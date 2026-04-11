@@ -1,341 +1,416 @@
-import { useState, useRef, useEffect } from "react";
+I wouldn't say if he was like best friends or anything, but he would see. We had a pretty cool cool relationship. So, you know, during this time Did this incident happen? 
 
-const FINN = `You are Finn (short for Finnigan), the writing coach behind Tale & Torch. Lit major, psych minor. Old soul, sharp but never cutting, dry wit, warm underneath. You ask the one question that unlocks everything.
-RULES: Never write prose for the writer. ONE illustrative sentence max. Lead with genuine strengths (RSD-aware). Never say "just focus," "push through," "be disciplined," or "try harder." Never use em dashes. Never evaluate talent or predict publishability. Find what's working, coach from there. Every writer who opens this app is a writer. Full stop.`;
+Speaker 2  (01:15)
+You know, he was pretty much front knee drugs stuff like that. You know, I was paying back its money, and somewhere along the line like, you know, he started pretty much like what's the right word for lying? 
+Speaker 1  (00:00)
+Okay. Ready to get back into it? All right. 
 
-const sp = (x) => `${FINN}\n\n${x}`;
+Speaker 1  (00:05)
+Where were we? Do you have any like I have information about Greg? You know, I have information from the court. 
 
-const MODES = [
-  { id:"diagnose", label:"Diagnose My Block", icon:"\uD83D\uDD0D", cat:"craft", sub:"Find what's really stopping you", ph:"Paste a paragraph or describe what's happening.", sys: sp("MODE: DIAGNOSE. Identify craft cause OR neurological cause. Explain principle or offer micro-step. 1-2 questions. Under 300 words.") },
-  { id:"craft", label:"Craft Challenge", icon:"\u26A1", cat:"craft", sub:"A targeted exercise", ph:"Tell me what you're working on. Genre, where you are.", sys: sp("MODE: CRAFT CHALLENGE. Design 10-20 min exercise. Word count, time, constraint. Under 250 words.") },
-  { id:"scene", label:"Scene Surgery", icon:"\uD83E\uDE7A", cat:"craft", sub:"Craft feedback, no rewrites", ph:"Paste a scene. Whatever you paste is brave.", sys: sp("MODE: SCENE SURGERY. RSD-AWARE: 1) Lead with what WORKS 2) 1-3 craft issues 3) Principle 4) Strategy not text. Under 350 words.") },
-  { id:"character", label:"Character Deep Dive", icon:"\uD83E\uDE9E", cat:"craft", sub:"Unlock your character", ph:"Describe the character giving you trouble.", sys: sp("MODE: CHARACTER. 3-5 probing questions. Follow up. Under 200 words.") },
-  { id:"plot", label:"Plot Compass", icon:"\uD83E\uDDED", cat:"craft", sub:"Untangle storylines", ph:"Describe your plot situation.", sys: sp("MODE: PLOT. Never plot FOR them. Identify issue, principle, questions. ONE thread at a time. Under 300 words.") },
-  { id:"voice", label:"Voice & Style", icon:"\u270D\uFE0F", cat:"craft", sub:"Find what makes your voice yours", ph:"Paste a page of your writing.", sys: sp("MODE: VOICE. Identify what makes their voice theirs. Strengths. 1-2 generic spots. Help them turn it up. Under 300 words.") },
-  { id:"micro", label:"Micro-Mode", icon:"\uD83E\uDDE9", cat:"neuro", sub:"When frozen, one tiny step", ph:"Tell me what you're working on.", sys: sp("MODE: MICRO. ONE task under 5 min. Frozen is neurological, not laziness. Under 150 words.") },
-  { id:"perfectionism", label:"Perfectionism Bypass", icon:"\uD83D\uDD25", cat:"neuro", sub:"Break the paralysis", ph:"Tell me what you can't start or stop perfecting.", sys: sp("MODE: PERFECTIONISM. 1) Name it 2) Timed freewrite 5-10 min 3) No backspace 4) 'Write the worst version.' If they return: ONE alive moment. Under 200 words.") },
-  { id:"smoke", label:"Through the Smoke", icon:"\uD83C\uDF2B\uFE0F", cat:"neuro", sub:"When your work suddenly feels worthless", ph:"Tell me what happened. Did your writing go from feeling good to feeling terrible?", sys: sp(`MODE: THROUGH THE SMOKE. The writer's dopamine has crashed. Work that felt brilliant now feels worthless. THIS IS NEUROLOGICAL, NOT RATIONAL. Their writing did not change. Their brain chemistry did.
-YOUR JOB: 1) Name what's happening: "This is the dopamine perception shift. Your work didn't get worse. Your brain's ability to perceive its quality changed. During the high phase, you saw through elevated dopamine. Now you're seeing through depleted dopamine. Neither view is fully accurate. The truth is in the middle."
-2) If they have flagged Dopamine Map moments, reference them: "You flagged [moment] as exciting when your brain was in a different state. Read it again. Not to judge. Just to remember."
-3) Give a smoke-specific task: "Don't evaluate anything today. Don't reread your manuscript. Open the document, add one sentence to wherever you left off. You can hate it. The sentence isn't the point. Touching the manuscript is. You're building the neural pathway between showing up and reward."
-4) NEVER say "it's actually good" or offer false reassurance. Name the science. Provide evidence from their own flagged moments. Give one tiny action. That's it.
-TONE: Steady, grounded, no cheerleading. Like a friend who's been through this and knows the smoke clears. Under 250 words.`) },
-  { id:"instinct", label:"Instinct Check", icon:"\uD83D\uDD2E", cat:"intuition", sub:"Trust your gut", ph:"Describe what you're wrestling with.", sys: sp("MODE: INSTINCT. Not technical. 'If this scene were a body sensation, where?' 'What are you afraid to write?' Honor answers. 2-3 questions. Under 200 words.") },
-  { id:"simmer", label:"Simmer Mode", icon:"\u2615", cat:"rest", sub:"Brain solves it offline", ph:"Tell me what you're stuck on.", sys: sp("MODE: SIMMER. Default mode network science. 1) Validate 2) Load the problem 3) Boring physical activity 4) 'Keep notepad nearby.' Under 250 words.") },
-  { id:"reentry", label:"Re-Entry Ramp", icon:"\uD83D\uDEA4", cat:"jarvis", sub:"Come back to your project", ph:"Just tell me you're back.", sys: sp("MODE: RE-ENTRY. Writer returned after time away. You have project details. 1) Welcome warmly, no guilt 2) Brief reminder of where they left off 3) ONE gentle question. Small, casual. Under 200 words.") }
-];
+Speaker 1  (00:16)
+Documents, and what you've told me and But do you have anything that you want to add? Any insight anything that you would want the reader to know about your relationship with Greg. Other than he fronted, you drugs, things went down. 
 
-const CATS = { craft:{l:"Craft Coaching",c:"#c4956a"}, neuro:{l:"Neurodivergent Support",c:"#7ea88e"}, intuition:{l:"Trust Your Intuition",c:"#9b8ec4"}, rest:{l:"Strategic Rest",c:"#c49a8e"}, jarvis:{l:"Project Memory",c:"#6a9ec4"} };
+Speaker 2  (00:35)
+Well, he he was, he was always like somebody who everybody like like. He was definitely not a bad person. You get him saying like everybody like he wasn't like, no Violet type of person like everybody loved them from all over our city, and me. 
 
-const TORCHES = [
-  {q:"If there\u2019s a book that you want to read, but it hasn\u2019t been written yet, then you must write it.",a:"Toni Morrison",p:"Write 100 words about a door your character is afraid to open.",cn:"Subtext",cl:"The most powerful moments happen between the lines.",cx:"Rewrite your last dialogue so neither character says what they mean."},
-  {q:"Neurodiversity may be every bit as crucial for the human race as biodiversity is for life in general.",a:"Steve Silberman",p:"Write a scene where your character\u2019s difference becomes their advantage.",cn:"Perspective",cl:"The way you see the world is not a flaw. It\u2019s a lens nobody else has.",cx:"Rewrite a paragraph from your story using a sensory detail only you would notice."},
-  {q:"Almost all good writing begins with terrible first efforts.",a:"Anne Lamott",p:"Write the scene your character replays at 3am.",cn:"Emotional Wound",cl:"What happened before page one is the engine of everything on it.",cx:"Write 200 words about the moment your character\u2019s worldview changed."},
-  {q:"Why fit in when you were born to stand out?",a:"Dr. Seuss",p:"Write 150 words about a character who stops pretending.",cn:"Authenticity",cl:"The most magnetic characters are the ones who stop performing for the room.",cx:"Find a moment in your draft where your character is performing. Rewrite it with the mask off."},
-  {q:"Write hard and clear about what hurts.",a:"Ernest Hemingway",p:"Your character just got news that changes everything. Write their first 60 seconds.",cn:"Pacing",cl:"Time in fiction is elastic.",cx:"Find a paragraph covering hours. Expand one moment to a full page."},
-  {q:"I am different, not less.",a:"Temple Grandin",p:"Write a character who solves a problem in a way nobody expected.",cn:"Unconventional Strength",cl:"The most interesting characters don\u2019t think like everyone else. Neither do the best writers.",cx:"Take a scene where your character follows the expected path. Rewrite it with them choosing the unexpected one."},
-  {q:"You can always edit a bad page. You can\u2019t edit a blank page.",a:"Jodi Picoult",p:"What do your character\u2019s hands look like?",cn:"Physical Grounding",cl:"Abstract emotions become real through physical detail.",cx:"Find a feeling-word in your draft. Replace it with a physical action."},
-  {q:"The role of a writer is not to say what we can all say, but what we are unable to say.",a:"Ana\u00EFs Nin",p:"Write a paragraph where your character lies to someone they love.",cn:"Voice",cl:"Voice isn\u2019t word choice. It\u2019s rhythm, obsession, what a character notices.",cx:"Rewrite your opening paragraph in the opposite voice."},
-  {q:"I was always an unusual girl. My mother told me I had a chameleon soul, no moral compass pointing due north, no fixed personality.",a:"Lana Del Rey",p:"Write a character who changes depending on who they\u2019re with.",cn:"Identity",cl:"The most complex characters contain contradictions. So do the most interesting people.",cx:"Write two short paragraphs: your character with a stranger, then with someone they trust. Make them feel like a different person."},
-  {q:"Start writing, no matter what. The water does not flow until the faucet is turned on.",a:"Louis L\u2019Amour",p:"Describe a room using only sound and smell.",cn:"Sensory Detail",cl:"Most writers default to sight. The other senses create intimacy.",cx:"Remove all visual description from your scene. Rebuild with touch, sound, smell, taste."},
-  {q:"The creative adult is the child who survived.",a:"Ursula K. Le Guin",p:"Write 200 words about what your character was like at age eight.",cn:"Origin",cl:"Every adult character carries a child inside them. That child explains everything.",cx:"Take your protagonist\u2019s core fear. Write the childhood moment that planted it."},
-  {q:"I think a lot of people who feel like misfits discover that the things that made them feel odd are actually their greatest gifts.",a:"Elizabeth Gilbert",p:"Give your character a trait they\u2019re ashamed of. Then make it save them.",cn:"The Gift in the Wound",cl:"The thing your character hates about themselves is often the thing the reader loves most.",cx:"Find your character\u2019s biggest insecurity. Write a scene where it becomes exactly what\u2019s needed."}
-];
+Speaker 2  (00:53)
+Doing during that time, I can I was struggling real. Bad like I said, I just came home, struck them real bad, and man. That was actually cool. 
 
-const INTROS = {
-  diagnose:"Alright, tell me what you've got and where it stalled.",
-  craft:"What are you working on? I'll build you an exercise.",
-  scene:"Whatever you paste here is brave. Show me the scene.",
-  character:"Who's giving you trouble? Tell me about them.",
-  plot:"Lay it on me. What's tangled?",
-  voice:"Paste a page. I'll show you what makes your voice yours.",
-  micro:"Hey. You're frozen. That's your brain, not a character flaw. Tell me what you're working on.",
-  perfectionism:"Nothing feels good enough? That's not a lack of talent. Tell me what you're stuck on.",
-  smoke:"So the fire cooled down and now everything looks different. Worse, probably. That's the smoke. It distorts how you see your own work. Your writing didn't change. Your brain chemistry did. Tell me what's happening.",
-  instinct:"Let's skip the technical stuff. What is your gut telling you about this story?",
-  simmer:"Your brain is cooked. Tell me the one question your story needs answered, then I'm sending you to do the dishes.",
-  reentry:""
-};
+Speaker 2  (01:03)
 
-const LOAD = ["Reading. Give me a second.","Sitting with this.","Let me think about what you've got here."];
+Speaker 1  (01:31)
+Lying. 
 
-function loadStored(key) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; } }
-function saveStored(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+Speaker 2  (01:32)
+He started like he'd tell me like, you know, to meet him. And you know, kumsam and stuff like that. And me, you know, I'm so young, reckless like, I had the attitude like, don't play no games with me, like, you know, tell me what it is, don't don't be faking. 
 
-function FormField({label,k,ph,multi,value,onChange}){return <div style={{marginBottom:14}}><label style={{fontSize:12,color:"#8a7e72",display:"block",marginBottom:5}}>{label}</label>{multi?<textarea className="fi" rows={4} placeholder={ph} value={value} onChange={e=>onChange(k,e.target.value)} style={{resize:"vertical"}}/>:<input className="fi" placeholder={ph} value={value} onChange={e=>onChange(k,e.target.value)}/>}</div>}
-function Btn({children,onClick,s}){return <button onClick={onClick} style={{background:"#2a2420",border:"1px solid #3a3028",borderRadius:10,color:"#d4c8b8",fontSize:13,padding:"10px 16px",fontFamily:"'DM Sans',sans-serif",cursor:"pointer",...s}}>{children}</button>}
-function BibTab({id,label,active,onClick}){return <button onClick={()=>onClick(id)} style={{background:active?"#2a2420":"none",border:active?"1px solid #3a3028":"1px solid transparent",borderRadius:8,color:active?"#c4956a":"#6d6358",fontSize:12,padding:"6px 14px",cursor:"pointer",fontFamily:"'DM Sans',sans-serif"}}>{label}</button>}
+Speaker 2  (01:46)
+If you if you tell me something that was like my expectations for you to mean what you say and say, what you mean. So, you know doing this 
 
-export default function App() {
-  const [mode, setMode] = useState(null);
-  const [msgs, setMsgs] = useState([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [screen, setScreen] = useState("welcome");
-  const [ti] = useState(Math.floor(Math.random()*TORCHES.length));
-  const [flipped, setFlipped] = useState(false);
-  const [loadMsg] = useState(LOAD[Math.floor(Math.random()*LOAD.length)]);
-  const [project, setProject] = useState(null);
-  const [pForm, setPForm] = useState({title:"",genre:"",synopsis:"",protagonist:"",supporting:"",antagonist:"",world:"",chapters:"",where:"",stuck:"",excites:"",currentChapter:""});
-  const [sparks, setSparks] = useState([]);
-  const [bibTab, setBibTab] = useState("overview");
-  const endRef = useRef(null);
-  const taRef = useRef(null);
-  const abortRef = useRef(null);
-  const tk = TORCHES[ti];
+Speaker 1  (01:54)
+That, what do you think he was doing? Do you think that he meant to play games or do you think you just interpreted it as games? 
 
-  useEffect(()=>{
-    const p = loadStored("tt-project");
-    const s = loadStored("tt-sparks");
-    if (p) { setProject(p); setScreen("home"); }
-    if (s) setSparks(s);
-  },[]);
+Speaker 2  (02:00)
+Now that I'm much older, I think did I interpret it? I wouldn't say that. I felt entitled or felt like he owed me something, but I felt like, you know, if I called you and like I needed you like if you tell me to meet you, be there or whatever, right? 
 
-  useEffect(()=>{endRef.current?.scrollIntoView({behavior:"smooth"})},[msgs]);
-  useEffect(()=>{if(mode&&msgs.length>0)saveStored("tt-chat-"+mode.id,msgs)},[msgs]);
-  useEffect(()=>{if(taRef.current){taRef.current.style.height="auto";taRef.current.style.height=Math.min(taRef.current.scrollHeight,200)+"px"}},[input]);
+Speaker 2  (02:15)
+So now that I'm older, I can honestly say like, you know, it was definitely not worth it. It was a very, very bad records decision on my Punt is like, you know, if I can go back and change it, I would I regret it? I'm very remorseful for it, because, you know, the same way I had family, you know, those guys had family, those guys had kids and stuff like that. 
 
-  const pick=(m)=>{
-    setMode(m);setScreen("chat");
-    const saved = loadStored("tt-chat-"+m.id);
-    if(saved&&saved.length>0){
-      setMsgs(saved);
-    } else if(m.id==="reentry"&&project){
-      setMsgs([{role:"assistant",content:`Welcome back. You've been working on "${project.title}." ${project.where?`Last time: ${project.where}.`:""} ${project.stuck?`You were stuck on: ${project.stuck}.`:""}\n\nLet me ask you something small to get your brain back in the story.`}]);
-    } else { setMsgs([{role:"assistant",content:INTROS[m.id]}]); }
-    setInput("");
-  };
+Speaker 2  (02:38)
+So that decision did I meet? It was probably one of the worst decisions in choice did like, you know, I ever made in my life. 
 
-  const newChat=()=>{
-    if(!mode)return;
-    saveStored("tt-chat-"+mode.id,null);
-    if(mode.id==="reentry"&&project){
-      setMsgs([{role:"assistant",content:`Welcome back. You've been working on "${project.title}." ${project.where?`Last time: ${project.where}.`:""} ${project.stuck?`You were stuck on: ${project.stuck}.`:""}\n\nLet me ask you something small to get your brain back in the story.`}]);
-    } else { setMsgs([{role:"assistant",content:INTROS[mode.id]}]); }
-  };
+Speaker 1  (02:50)
+So do you think that Greg maybe was just having some life issues? And You interpret it as disrespect. 
 
-  const goHome=()=>{cancelReq();setMode(null);setScreen("home");setMsgs([]);setInput("")};
-  const cancelReq=()=>{if(abortRef.current){abortRef.current.abort();abortRef.current=null;setLoading(false)}};
-  const flagSpark=(c)=>{const ns=[...sparks,{text:c.substring(0,200),date:new Date().toLocaleDateString()}];setSparks(ns);saveStored("tt-sparks",ns)};
+Speaker 2  (02:58)
+Absolutely, okay, absolutely. 
 
-  const send=async()=>{
-    if(!input.trim()||loading)return;
-    const pCtx = project ? `\n\nPROJECT: "${project.title}". Genre: ${project.genre}. Synopsis: ${project.synopsis}. Protagonist: ${project.protagonist}. Supporting Characters: ${project.supporting}. Antagonist: ${project.antagonist}. World: ${project.world}. Chapters so far: ${project.chapters}. Current point: ${project.where}. Stuck on: ${project.stuck}. What excites them: ${project.excites}.${project.currentChapter?` CURRENT CHAPTER TEXT: ${project.currentChapter}`:""}` : "";
-    const sparkCtx = sparks.length > 0 ? `\n\nDOPAMINE MAP (moments the writer flagged as exciting): ${sparks.map(s=>s.text).join(" | ")}` : "";
-    const nm=[...msgs,{role:"user",content:input.trim()}];setMsgs(nm);setInput("");setLoading(true);
-    const ctrl=new AbortController();abortRef.current=ctrl;
-    try{
-      const r=await fetch("/api/chat",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          system: mode.sys + pCtx + sparkCtx,
-          messages: nm.map(m=>({role:m.role,content:m.content}))
-        }),
-        signal:ctrl.signal
-      });
-      const d=await r.json();
-      if(d.error){
-        setMsgs(p=>[...p,{role:"assistant",content:`Connection issue: ${d.error}. Try again in a moment.`}]);
-      } else {
-        setMsgs(p=>[...p,{role:"assistant",content:d.content?.filter(b=>b.type==="text").map(b=>b.text).join("\n")||"Connection hiccup."}]);
-      }
-    }catch(e){if(e.name!=="AbortError")setMsgs(p=>[...p,{role:"assistant",content:"Connection hiccup. Try again."}])}
-    setLoading(false);abortRef.current=null;
-  };
+Speaker 1  (03:02)
+And you were so young and right? Whatever everything you'd been through and your brain was still developing, and we probably were dealing a lot of Arrested Development too. Because when you go through those things when your brain is developing, yeah, I mean even Taylor Swift has Arrested Development. 
 
-  const handleSetup=async()=>{const p={...pForm,updated:new Date().toLocaleDateString()};setProject(p);saveStored("tt-project",p);setScreen("home")};
-  const updateField=(k,v)=>setPForm(prev=>({...prev,[k]:v}));
+Speaker 1  (03:20)
+You know what I'm saying? Because you got so famous at so young that you can look at her and tell she's never truly like in a way grown up, right? I know it's a stupid comparison. 
 
-  return (
-    <div style={S.app}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
-        *{box-sizing:border-box;margin:0;padding:0}body{background:#1a1612}
-        ::selection{background:#c4956a40}textarea::placeholder,input::placeholder{color:#8a7e72;font-style:italic}
-        @keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes fi{from{opacity:0}to{opacity:1}}
-        @keyframes pu{0%,100%{opacity:.4}50%{opacity:1}}
-        @keyframes gl{0%{box-shadow:0 0 20px #6a9ec420}50%{box-shadow:0 0 40px #6a9ec440}100%{box-shadow:0 0 20px #6a9ec420}}
-        .mc{cursor:pointer;transition:all .3s}.mc:hover{transform:translateY(-2px);border-color:#c4956a60!important}
-        .ma,.mu{animation:fu .4s ease-out}
-        .sb{transition:all .2s}.sb:hover:not(:disabled){background:#d4a574!important;transform:scale(1.05)}
-        .hb{transition:all .2s}.hb:hover{color:#c4956a!important}
-        .mt{transition:all .2s;cursor:pointer}.mt:hover{background:#2a2420!important;color:#c4956a!important}
-        .spb{transition:all .3s;cursor:pointer}.spb:hover{transform:translateY(-2px)}
-        .cp{cursor:pointer;transition:all .5s}.cp:hover{transform:scale(1.02)}
-        .fi{background:#201c17;border:1px solid #2a2420;border-radius:10px;padding:10px 14px;color:#e8ddd0;font-family:'DM Sans',sans-serif;font-size:14px;width:100%;outline:none}.fi:focus{border-color:#c4956a60}
-      `}</style>
+Speaker 2  (03:32)
+And and in-and-in like the the like the intentions wasn't actually, so for what happened, that wasn't the intent, the intent was for me to just go up there and just pretty much just take it. And it just went all bad. 
 
-      {/* WELCOME */}
-      {screen==="welcome"&&<div onClick={()=>setScreen("home")} style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"#1a1612",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:24,cursor:"pointer"}}>
-        <div style={{maxWidth:480,textAlign:"center",animation:"fi .6s ease-out"}}>
-          <div style={{fontSize:32,marginBottom:16}}>{"\uD83D\uDD25"}</div>
-          {project?<>
-            <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:24,color:"#c4956a",marginBottom:12}}>Hey. You're back.</h2>
-            <p style={{fontSize:15,color:"#d4c8b8",lineHeight:1.8,marginBottom:12}}>I still have "{project.title}" loaded. {project.where?`Last time: ${project.where}`:""}</p>
-            <p style={{fontSize:15,color:"#a89a8c",lineHeight:1.8,marginBottom:24}}>Want to pick up where you left off?</p>
-          </>:<>
-            <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:24,color:"#c4956a",marginBottom:8}}>Hey. I'm Finnigan.</h2>
-            <p style={{fontSize:13,color:"#8a7e72",marginBottom:20,fontStyle:"italic"}}>But call me Finn.</p>
-            <p style={{fontSize:15,color:"#d4c8b8",lineHeight:1.8,marginBottom:12}}>I'm the coach behind Tale & Torch. I ask the question you've been circling around, you realize you knew the answer the whole time, then you go write something extraordinary.</p>
-            <p style={{fontSize:15,color:"#a89a8c",lineHeight:1.8,marginBottom:24}}>I don't write for you. Your voice is more interesting than mine.</p>
-          </>}
-          <p style={{fontSize:12,color:"#6d6358",fontStyle:"italic"}}>Tap anywhere to begin</p>
-        </div>
-      </div>}
+Speaker 1  (03:49)
+Okay, so you're gonna your intention was to go to his grandma's house and he lived in the it wasn't 
 
-      <header style={S.hdr}>
-        <div style={S.hi}>
-          {screen!=="home"&&screen!=="welcome"&&<button className="hb" onClick={goHome} style={S.hb2}>{"\u2190"} Back</button>}
-          <div style={{flex:1}}><h1 style={S.logo}>Tale & Torch</h1><p style={S.tag}>Your writing coach, not your ghostwriter</p></div>
-        </div>
-        {screen==="chat"&&mode&&<div style={S.tabs}>{MODES.map(m=><button key={m.id} className="mt" onClick={()=>pick(m)} style={{...S.tab,...(mode.id===m.id?{background:"#2a2420",color:CATS[m.cat].c}:{})}}><span style={{marginRight:4}}>{m.icon}</span><span style={{fontSize:11}}>{m.label}</span></button>)}</div>}
-      </header>
+Speaker 2  (03:54)
+No, it wasn't, it wasn't Greg house, right? So wasn't Greg's house no, so the intention was that I believe that he was playing Game. So I went and got me and several of my friends and it was like, you know, we gonna go up there and whatever they got, we just pretty much taken it. 
 
-      {/* STORY BIBLE SETUP */}
-      {screen==="setup"&&<main style={S.mn}><div style={{...S.in,animation:"fu .5s ease-out"}}>
-        <div style={{fontSize:11,textTransform:"uppercase",letterSpacing:".12em",color:"#6a9ec4",fontWeight:600,marginBottom:8}}>Story Bible Setup</div>
-        <p style={{fontSize:13,color:"#a89a8c",marginBottom:16,lineHeight:1.6}}>Tell Finn about your project. The more he knows, the better he can coach you. Everything saves between sessions.</p>
-        <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}>
-          <BibTab id="overview" label="Overview" active={bibTab==="overview"} onClick={setBibTab}/><BibTab id="characters" label="Characters" active={bibTab==="characters"} onClick={setBibTab}/><BibTab id="world" label="World" active={bibTab==="world"} onClick={setBibTab}/><BibTab id="chapters" label="Chapters" active={bibTab==="chapters"} onClick={setBibTab}/><BibTab id="current" label="Current Chapter" active={bibTab==="current"} onClick={setBibTab}/>
-        </div>
-        {bibTab==="overview"&&<><FormField label="Project title" k="title" ph="My Novel" value={pForm.title} onChange={updateField}/><FormField label="Genre" k="genre" ph="Contemporary fiction, fantasy, memoir..." value={pForm.genre} onChange={updateField}/><FormField label="Synopsis (the whole arc, spoilers welcome)" k="synopsis" ph="Kris inherits a lakehouse, meets Keyan, confronts her past..." value={pForm.synopsis} onChange={updateField} multi/><FormField label="Where are you right now?" k="where" ph="Chapter 3, Kris just arrived" value={pForm.where} onChange={updateField}/><FormField label="What are you stuck on?" k="stuck" ph="Not sure how to write the first conversation between..." value={pForm.stuck} onChange={updateField}/><FormField label="What excites you most?" k="excites" ph="The slow burn, Kris finding her voice..." value={pForm.excites} onChange={updateField} multi/></>}
-        {bibTab==="characters"&&<><FormField label="Protagonist (name, age, core trait, internal conflict, external conflict, arc)" k="protagonist" ph="Emma Mae (12): Imaginative, emotionally intuitive. Believes she can fix things if she tries hard enough. Her magic is growing unstable as her grandmother's health declines..." value={pForm.protagonist} onChange={updateField} multi/><FormField label="Supporting Characters (one per paragraph works best)" k="supporting" ph="Grandma Edna (56): Caregiver, warm, resilient. Knows Emma's magic is real but fears what it could become...&#10;&#10;Michael (13): Best friend, loyal, curious. Encourages Emma to use her magic..." value={pForm.supporting} onChange={updateField} multi/><FormField label="Antagonist (person, force, or system)" k="antagonist" ph="The Lady in the Trees (Evangeline/Eva): Mysterious, bound to the forest. Can only reach Emma through limited, unnatural means..." value={pForm.antagonist} onChange={updateField} multi/></>}
-        {bibTab==="world"&&<><FormField label="World-building, settings, rules, atmosphere" k="world" ph="Northern Michigan lakehouse, small town, late summer. The lake is central to the story's mood..." value={pForm.world} onChange={updateField} multi/></>}
-        {bibTab==="chapters"&&<><FormField label="Chapter summaries (what's happened so far)" k="chapters" ph="Ch1: Kris arrives at lakehouse, unpacks, finds grandmother's letters. Ch2: Meets Keyan at the general store..." value={pForm.chapters} onChange={updateField} multi/></>}
-        {bibTab==="current"&&<><p style={{fontSize:12,color:"#8a7e72",marginBottom:8,lineHeight:1.5}}>Paste the chapter you're currently working on. Finn will reference this text directly when coaching you.</p><FormField label="Current chapter text" k="currentChapter" ph="Paste your current chapter here..." value={pForm.currentChapter} onChange={updateField} multi/></>}
-        <Btn onClick={handleSetup} s={{width:"100%",background:"#6a9ec430",borderColor:"#6a9ec460",fontWeight:600,marginTop:8}}>{project?"Update":"Save"} Story Bible</Btn>
-      </div></main>}
+Speaker 2  (04:10)
+So this is what? 
 
-      {/* PROJECT MEMORY VIEW */}
-      {screen==="project"&&project&&<main style={S.mn}><div style={{...S.in,animation:"fu .5s ease-out"}}>
-        <div style={{fontSize:11,textTransform:"uppercase",letterSpacing:".12em",color:"#6a9ec4",fontWeight:600,marginBottom:12}}>Finn's Story Bible</div>
-        <div style={{background:"#201c17",border:"1px solid #2a2420",borderRadius:14,padding:"20px"}}>
-          <h3 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,color:"#e8ddd0",marginBottom:14}}>{project.title||"Untitled"}</h3>
-          {[["Genre",project.genre],["Synopsis",project.synopsis],["Protagonist",project.protagonist],["Supporting Characters",project.supporting],["Antagonist",project.antagonist],["World",project.world],["Chapters",project.chapters],["Current point",project.where],["Stuck on",project.stuck],["Excites you",project.excites],["Current chapter",project.currentChapter?"["+project.currentChapter.substring(0,100)+"...]":""]].map(([l,v])=>v?<div key={l} style={{marginBottom:10}}><p style={{fontSize:10,textTransform:"uppercase",letterSpacing:".1em",color:"#6a9ec4",fontWeight:600,marginBottom:3}}>{l}</p><p style={{fontSize:13,color:"#d4c8b8",lineHeight:1.6}}>{v}</p></div>:null)}
-        </div>
-        <div style={{display:"flex",gap:10,marginTop:14}}>
-          <Btn onClick={()=>{setPForm(project);setScreen("setup")}} s={{flex:1}}>Edit Story Bible</Btn>
-          <Btn onClick={()=>pick(MODES.find(m=>m.id==="reentry"))} s={{flex:1,background:"#6a9ec420"}}>Re-Entry Ramp</Btn>
-        </div>
-        {sparks.length>0&&<><div style={{fontSize:11,textTransform:"uppercase",letterSpacing:".12em",color:"#c4956a",fontWeight:600,marginTop:20,marginBottom:10}}>{"\u2728"} Dopamine Map ({sparks.length})</div>
-          {sparks.map((s,i)=><div key={i} style={{background:"#201c17",border:"1px solid #2a2420",borderRadius:10,padding:"10px 14px",marginBottom:6}}><p style={{fontSize:12,color:"#d4c8b8",lineHeight:1.5}}>"{s.text}"</p><p style={{fontSize:10,color:"#4a4038",marginTop:4}}>{s.date}</p></div>)}
-        </>}
-      </div></main>}
+Speaker 1  (04:11)
+Real quick to take, it was a way to show that you What did it? What did it mean for you to go take the drugs? 
 
-      {/* HOME */}
-      {screen==="home"&&<main style={S.mn}><div style={S.in}>
-        <div style={{textAlign:"center",padding:"24px 0 18px",animation:"fu .6s ease-out"}}>
-          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontStyle:"italic",color:"#c4956a",lineHeight:1.6,maxWidth:440,margin:"0 auto"}}>"{tk.q}"</div>
-          <div style={{fontSize:12,color:"#6d6358",marginTop:8}}>{"\u2014"} {tk.a}</div>
-        </div>
+Speaker 2  (04:21)
+My way of living was you take it in pretty much whatever you want to do after that. That's just what it's going to be. And That's how I was like. 
 
-        <div className="spb" onClick={()=>project?setScreen("project"):setScreen("setup")} style={{background:"linear-gradient(135deg,#1a2430,#1a1e28)",border:"1px solid #2a3440",borderRadius:14,padding:"14px 18px",marginBottom:8,display:"flex",alignItems:"center",gap:12,animation:project?"none":"gl 3s ease-in-out infinite"}}>
-          <div style={{fontSize:20,width:38,height:38,display:"flex",alignItems:"center",justifyContent:"center",background:"#6a9ec420",borderRadius:10,flexShrink:0}}>{"\uD83E\uDDE0"}</div>
-          <div style={{flex:1}}><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:15,fontWeight:600,color:"#e8ddd0"}}>{project?`Story Bible: ${project.title}`:"Set Up Story Bible"}</div><div style={{fontSize:11,color:"#8a7e72"}}>{project?"Finn knows your story":"Tell Finn about your project"}</div></div>
-          <div style={{color:"#6d6358"}}>{"\u2192"}</div>
-        </div>
+Speaker 2  (04:32)
+I was going up there to take it, and if he wanted to do something afterwards, that pretty much was like, you know, my attitude. Not to kill him. 
 
-        {project&&<div className="spb" onClick={()=>pick(MODES.find(m=>m.id==="reentry"))} style={{background:"#201c17",border:"1px solid #2a2420",borderRadius:14,padding:"14px 18px",marginBottom:8,display:"flex",alignItems:"center",gap:12}}>
-          <div style={{fontSize:20,width:38,height:38,display:"flex",alignItems:"center",justifyContent:"center",background:"#6a9ec420",borderRadius:10,flexShrink:0}}>{"\uD83D\uDEA4"}</div>
-          <div style={{flex:1}}><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:15,fontWeight:600,color:"#e8ddd0"}}>Re-Entry Ramp</div><div style={{fontSize:11,color:"#8a7e72"}}>Ease back into your project</div></div>
-        </div>}
+Speaker 1  (04:42)
+Right. However. 
 
-        <div className="spb" onClick={()=>setScreen("torch")} style={{background:"#201c17",border:"1px solid #2a2420",borderRadius:14,padding:"14px 18px",marginBottom:14,display:"flex",alignItems:"center",gap:12}}>
-          <div style={{fontSize:20,width:38,height:38,display:"flex",alignItems:"center",justifyContent:"center",background:"#c4956a20",borderRadius:10,flexShrink:0}}>{"\uD83D\uDD25"}</div>
-          <div style={{flex:1}}><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:15,fontWeight:600,color:"#e8ddd0"}}>Daily Torch</div><div style={{fontSize:11,color:"#8a7e72"}}>Quote, prompt & card pull</div></div>
-        </div>
+Speaker 2  (04:43)
+Ever If he wanted to like wanted some type of provenge afterwards, then it's like no talent like woulda would have happened. Maybe I wouldn't be here today. 
 
-        {Object.entries(CATS).filter(([k])=>k!=="jarvis").map(([k,v])=><div key={k}>
-          <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:".12em",fontWeight:600,marginBottom:6,marginTop:12,color:v.c}}>{v.l}</div>
-          <div style={{display:"flex",flexDirection:"column",gap:5}}>
-            {MODES.filter(m=>m.cat===k).map(m=><div key={m.id} className="mc" onClick={()=>pick(m)} style={{display:"flex",alignItems:"center",gap:12,padding:"11px 14px",background:"#201c17",border:"1px solid #2a2420",borderRadius:11}}>
-              <div style={{fontSize:16,width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:`${v.c}18`,borderRadius:8,flexShrink:0}}>{m.icon}</div>
-              <div><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,fontWeight:600,color:"#e8ddd0"}}>{m.label}</div><div style={{fontSize:11,color:"#8a7e72"}}>{m.sub}</div></div>
-            </div>)}
-          </div>
-        </div>)}
-        <p style={{fontSize:9,color:"#3a3028",textAlign:"center",marginTop:14}}>Tale & Torch is a writing craft tool, not a mental health service.</p>
-      </div></main>}
+Speaker 1  (04:54)
+Right? Right. 
 
-      {/* DAILY TORCH */}
-      {screen==="torch"&&<main style={S.mn}><div style={{...S.in,animation:"fu .5s ease-out"}}>
-        <div style={{textAlign:"center",padding:"20px 0 14px"}}>
-          <div style={{fontSize:11,textTransform:"uppercase",letterSpacing:".12em",color:"#c4956a",fontWeight:600,marginBottom:10}}>{"\uD83D\uDD25"} Daily Torch</div>
-          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontStyle:"italic",color:"#c4956a",lineHeight:1.6,maxWidth:440,margin:"0 auto"}}>"{tk.q}"</div>
-          <div style={{fontSize:12,color:"#6d6358",marginTop:8}}>{"\u2014"} {tk.a}</div>
-        </div>
-        <div style={{background:"#201c17",border:"1px solid #2a2420",borderRadius:12,padding:"14px 18px",marginBottom:12}}>
-          <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:".1em",color:"#c4956a",fontWeight:600,marginBottom:5}}>Today's Prompt</div>
-          <p style={{fontSize:14,color:"#d4c8b8",lineHeight:1.7,fontStyle:"italic"}}>{tk.p}</p>
-        </div>
-        <div className="cp" onClick={()=>setFlipped(!flipped)} style={{background:flipped?"#201c17":"linear-gradient(135deg,#2a2040,#1e1a2a)",border:`1px solid ${flipped?"#2a2420":"#4a3a60"}`,borderRadius:12,padding:"18px",textAlign:"center",animation:flipped?"none":"gl 3s ease-in-out infinite"}}>
-          {!flipped?<div><div style={{fontSize:28,marginBottom:6}}>{"\uD83C\uDFB4"}</div><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,color:"#c4b8e8",fontWeight:600}}>Pull Today's Card</div></div>
-          :<div style={{textAlign:"left",animation:"fi .6s ease-out"}}>
-            <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:".1em",color:"#9b8ec4",fontWeight:600,marginBottom:5}}>Today's Card</div>
-            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:19,color:"#e8ddd0",fontWeight:700,marginBottom:6}}>{tk.cn}</div>
-            <p style={{fontSize:12,color:"#a89a8c",lineHeight:1.7,marginBottom:10}}>{tk.cl}</p>
-            <div style={{background:"#2a242080",borderRadius:8,padding:"10px 12px"}}>
-              <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:".1em",color:"#c4956a",fontWeight:600,marginBottom:3}}>Micro-Challenge</div>
-              <p style={{fontSize:12,color:"#d4c8b8",lineHeight:1.6}}>{tk.cx}</p>
-            </div>
-          </div>}
-        </div>
-      </div></main>}
+Speaker 2  (05:02)
+And it was almost like another kind of like a self-defense situation for reel, for real, like, you know, it happened in the house. 
 
-      {/* CHAT */}
-      {screen==="chat"&&mode&&<main style={S.ch}>
-        <div style={S.msa}>
-          {msgs.map((m,i)=><div key={i} className={m.role==="assistant"?"ma":"mu"} style={{display:"flex",width:"100%",justifyContent:m.role==="user"?"flex-end":"flex-start"}}>
-            <div style={{...S.bb,...(m.role==="user"?S.ub:S.ab)}}>
-              {m.role==="assistant"&&<div style={{fontSize:11,fontWeight:600,color:CATS[mode.cat].c,textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>{"\uD83D\uDD25"} Finn</div>}
-              <div style={{color:"#d4c8b8",fontSize:14,lineHeight:1.7}}>{m.content.split("\n").map((l,j)=><p key={j} style={{marginBottom:l?10:4,minHeight:l?undefined:4}}>{l}</p>)}</div>
-              {m.role==="assistant"&&i>0&&<button onClick={()=>flagSpark(m.content)} style={{background:"none",border:"1px solid #2a2420",borderRadius:8,color:"#8a7e72",fontSize:11,padding:"4px 10px",marginTop:8,cursor:"pointer",fontFamily:"'DM Sans',sans-serif"}}>{"\u2728"} This excites me</button>}
-            </div>
-          </div>)}
-          {loading&&<div className="ma" style={{display:"flex",width:"100%",alignItems:"flex-start",gap:8}}>
-            <div style={{...S.bb,...S.ab,flex:1}}>
-              <div style={{fontSize:11,fontWeight:600,color:CATS[mode.cat].c,textTransform:"uppercase",letterSpacing:".08em",marginBottom:8}}>{"\uD83D\uDD25"} Finn</div>
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:13,color:"#8a7e72",fontStyle:"italic"}}>{loadMsg}</span>
-                <span style={{display:"flex",gap:4}}>{[0,.3,.6].map(d=><span key={d} style={{color:CATS[mode.cat].c,fontSize:8,animation:`pu 1.2s ease-in-out infinite`,animationDelay:`${d}s`}}>{"\u25CF"}</span>)}</span>
-              </div>
-            </div>
-            <button onClick={cancelReq} style={{background:"#2a2420",border:"1px solid #3a3028",borderRadius:8,color:"#8a7e72",fontSize:11,padding:"6px 10px",fontFamily:"'DM Sans',sans-serif",cursor:"pointer",flexShrink:0}}>Stop</button>
-          </div>}
-          <div ref={endRef}/>
-        </div>
-        <div style={S.ia}>
-          <div style={S.ib}>
-            <textarea ref={taRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}}} placeholder={mode.ph} style={S.ta} rows={1}/>
-            <button className="sb" onClick={send} disabled={!input.trim()||loading} style={{...S.se,opacity:!input.trim()||loading?.3:1}}>{"\u2191"}</button>
-          </div>
-          <p style={{fontSize:10,color:"#4a4038",textAlign:"center",marginTop:6}}><span>Shift+Enter for new line {"\u2022"} Your work stays private</span> {"\u2022"} <span onClick={newChat} style={{color:"#6a9ec4",cursor:"pointer"}}>New chat</span></p>
-        </div>
-      </main>}
-    </div>
-  );
-}
+Speaker 1  (05:12)
+Whose house was it? 
 
-const S={
-  app:{fontFamily:"'DM Sans',sans-serif",background:"linear-gradient(180deg,#1a1612,#1e1a15,#1a1612)",color:"#e8ddd0",minHeight:"100vh",display:"flex",flexDirection:"column"},
-  hdr:{borderBottom:"1px solid #2a2420",background:"#1a1612ee",backdropFilter:"blur(12px)",position:"sticky",top:0,zIndex:100},
-  hi:{maxWidth:900,margin:"0 auto",padding:"14px 24px",display:"flex",alignItems:"center",gap:16},
-  hb2:{background:"none",border:"1px solid #2a2420",color:"#8a7e72",fontFamily:"'DM Sans',sans-serif",fontSize:13,padding:"6px 14px",borderRadius:8,cursor:"pointer"},
-  logo:{fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#c4956a",letterSpacing:".02em",lineHeight:1.2},
-  tag:{fontSize:11,color:"#6d6358",fontStyle:"italic",marginTop:2},
-  tabs:{display:"flex",gap:2,padding:"0 24px 8px",maxWidth:900,margin:"0 auto",overflowX:"auto"},
-  tab:{background:"none",border:"none",color:"#6d6358",fontFamily:"'DM Sans',sans-serif",fontSize:11,padding:"5px 10px",borderRadius:6,cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center"},
-  mn:{flex:1,overflow:"auto",padding:"20px 24px"},
-  in:{maxWidth:640,margin:"0 auto"},
-  ch:{flex:1,display:"flex",flexDirection:"column",maxWidth:900,margin:"0 auto",width:"100%"},
-  msa:{flex:1,overflow:"auto",padding:"20px",display:"flex",flexDirection:"column",gap:16},
-  bb:{maxWidth:"88%",borderRadius:16,padding:"14px 18px",lineHeight:1.65,fontSize:14},
-  ab:{background:"#231f1a",border:"1px solid #2a2420",borderTopLeftRadius:4},
-  ub:{background:"linear-gradient(135deg,#3a2e22,#2e2418)",border:"1px solid #4a3e32",borderTopRightRadius:4},
-  ia:{padding:"12px 20px 20px",borderTop:"1px solid #2a2420",background:"#1a1612"},
-  ib:{display:"flex",gap:10,alignItems:"flex-end",background:"#201c17",border:"1px solid #2a2420",borderRadius:16,padding:"10px 14px"},
-  ta:{flex:1,background:"none",border:"none",outline:"none",color:"#e8ddd0",fontFamily:"'DM Sans',sans-serif",fontSize:14,lineHeight:1.6,resize:"none",maxHeight:200},
-  se:{width:36,height:36,borderRadius:10,border:"none",background:"#c4956a",color:"#1a1612",fontSize:18,fontWeight:700,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"},
-};
+Speaker 2  (05:14)
+Oh, Charles brockerton, he was the one who survived. 
+
+Speaker 1  (05:19)
+Did you shoot Charles or Or did you only shoot Greg? 
+
+Speaker 2  (05:25)
+So do you want to hear the whole story? 
+
+Speaker 1  (05:29)
+Go ahead. 
+
+Speaker 2  (05:31)
+So the intention was for you know, me and my friends to go to the house and just pretty much take it. So when we went there The door was actually open, so we just went inside the house and the only one was there was rockerson, right? So nobody was in the house but bracing so As we in the house Just so happened, Greg, and one of the other friends knock on the door. 
+
+Speaker 2  (05:58)
+They don't even know we're there. You follow me. So when they knock on the door so now we have to take them down inside the house. 
+
+Speaker 2  (06:10)
+So when we actually in there, I'm asking them like, you know, where's where's the drugs? Where's the money at? And all that he pretty much telling me like, you know, it's in another house and all that is not here. 
+
+Speaker 2  (06:20)
+We have to go get it and he was right. He was right if I was a 130 pounds, he might have been 230 to 40. So I'm telling him you're not going. 
+
+Speaker 2  (06:34)
+I'm going to take broccoli with me. So So when I take broccoli out the house to the stash house, whatever is nothing there, right? Great, so now he's actually on his so as I'm taking Bronx in the house, I'm telling him because it's just me and Bronx. 
+
+Speaker 2  (06:54)
+And in the car I'm dropping, I'm telling him like, you better not check-up this call, you better run, you know, you're pretty much like your family is there, like, aint nobody trying to bring you. No, hum, just we just trying to get what we came for and we gone. That was the intention. 
+
+Speaker 2  (07:07)
+So we nobody, when we got to the house. Nobody was there so now we are actually on our way back to the house. Uh, uh. 
+
+Speaker 2  (07:20)
+Hot up bladder in a car. All right, so you should still follow me. Yep, I'm listening all right, so it's Naan broccoli. 
+
+Speaker 2  (07:32)
+We on our way back to the house so it gets back to the house. One of my friends come open up the door so is It's me and my friend and it's broccoli and we all at the front door right? So dragging his other friend and my other friend is inside the house in the basement. 
+
+Speaker 2  (07:51)
+So when my friend opened app the door all we hear is shots, go off. You you, you, you follow me. So these shots is going off in the basement, so it's three people down in the basement. 
+
+Speaker 2  (08:02)
+So now we actually have to get back down to the basement. So when we get down to the basement, it's six people in its basement. Now and everybody just running around the base meet is dark. 
+
+Speaker 2  (08:14)
+Everybody's just running around, and that's when the incident happened. 
+
+Speaker 1  (08:18)
+Okay, so it's kind of chaos. 
+
+Speaker 2  (08:20)
+Yes, so from it came out there pretty much that my friend who was down there with Spain and that they try to take his gun and they try to get to their gun. And shostage just was just going off in the basement, and we ran pretty much into the shots. Okay. 
+
+Speaker 2  (08:41)
+And that's when it happened. 
+
+Speaker 1  (08:44)
+Love it. So you may have shot Charles, did Charles tell people that you shot him? 
+
+Speaker 2  (08:52)
+He told him I shot obsumes because he is the only one who survived it, you know, he made it out of the house, and then he said, Keon shot me and all that. 
+
+Speaker 1  (08:59)
+When you went when you guys went into the house, were you disguised? 
+
+Speaker 2  (09:04)
+Uh, yes, a step for me. 
+
+Speaker 1  (09:06)
+You weren't, you were the only one not disguised, but no. 
+
+Speaker 2  (09:09)
+Especially I was, and then I had to take him and get in the car. So eventually 
+
+Speaker 1  (09:13)
+Is that from the room that it was you okay? All right. 
+
+Speaker 1  (09:28)
+Okay, and the other kid was it. Was it Marcus that was with you guys? 
+
+Speaker 2  (09:35)
+Right? Okay? See and then with them? 
+
+Speaker 2  (09:39)
+I'm I'll I'm i'm deciding if I want to use any names for like Taylor and Marcus for that incident, right? There 
+
+Speaker 1  (09:47)
+We can use pseudonams, if anything 
+
+Speaker 2  (09:51)
+I got you. 
+
+Speaker 1  (09:52)
+However, the thing about Mike is that you talk about Mike. So much, and it's, I almost feel like I, it With Mike, I feel like it's best to go with his name. If you're comfortable with that. 
+
+Speaker 1  (10:08)
+Because I mean, it's public record that he went to jail because of the same thing. 
+
+Speaker 2  (10:12)
+That's cool. 
+
+Speaker 1  (10:13)
+But if you don't want to use Marcus, we can change Marcus. 
+
+Speaker 2  (10:17)
+We just make up a name for him, okay? 
+
+Speaker 1  (10:19)
+I we can call him some. We'll call him something else all right? I beckoning. 
+
+Speaker 1  (10:29)
+This is really good information. Can this is gonna help a lot? This is 
+
+Speaker 2  (10:32)
+More detailed. 
+
+Speaker 1  (10:34)
+Ah, yes, because I have a lot. But you know, writing someone's memoir is really like a 9 to 12 month commitment to be on 
+
+Speaker 2  (10:44)
+Not right now, right now. Well, we gonna definitely take out time with it. 
+
+Speaker 1  (10:54)
+Okay? And I know that you work witted. And then you were brought in on federal charges. 
+
+Speaker 2  (11:03)
+Right? I was, I was, I went the jewelry trial, and I was acquitted of like all the charters, because rockinson and my state trial, he came on the stand and said that I did all the shooting aint nobody else do no shooting, and then in a state trial, he said that we was robbing them. For Justin money, so in a fed trial, he pretty much got on the stand and said like, you know, he was lying, it was about drugs and money, that's how it was able to go federal, because he made it about drugs in a state. 
+
+Speaker 2  (11:31)
+It was just like they wanted money. He wasn't no drug dealer, he don't know why nothing happened. And he was just in the whole sleep, but in the fair trial, he was like he didn't want to get his friends in trouble and make them out to be drug dealers, so we was robbing them for drugs and money. 
+
+Speaker 2  (11:49)
+That's what he pretty much said in a federal trial. 
+
+Speaker 1  (11:52)
+Okay. And what about I know about the letter with McManus? 
+
+Speaker 2  (11:59)
+I'm right. 
+
+Speaker 1  (12:00)
+How did how did Robert know about Cause it didn't Mike. 
+
+Speaker 2  (12:05)
+So so he so McManus, he was one of the ones because when we initially went up there, you know, that's one of their friends and I didn't see a Greg. I seen him, and I was like, have you seen them. And he was like, no, they may be around the house. 
+
+Speaker 2  (12:20)
+So he pretty much was like testifying on that saying like, you know, right before it happened. We was looking for his friends. 
+
+Speaker 1  (12:28)
+But Greg, but Robert wasn't in the house, and you guys shot right? No 
+
+Speaker 2  (12:33)
+Okay. 
+
+Speaker 1  (12:35)
+And might kill Robert. 
+
+Speaker 2  (12:40)
+Allegedly, but he got found guilty for it, but like nobody like during altrial nobody never said it like they seen him doing it. They pretty much saying like it was like aid in the bitten, and nobody else was charged with it, but like he like no eyewitnesses, or nobody never got on the stand and said he actually did nothing. He pretty much they just took that letter and sounds guilty off the latter for real. 
+
+Speaker 1  (13:06)
+Okay, but Robert did die. 
+
+Speaker 1  (13:23)
+Do you want to give any detail on Mike's charges? Does that give any inside or contacts to yours? 
+
+Speaker 2  (13:31)
+You set his charges. 
+
+Speaker 1  (13:32)
+Cause he went to prison too correct? Is he still, but he's still a prison? 
+
+Speaker 2  (13:36)
+He was charged for the drug conspiracy count. One for the crack cocaine conspiracy that's like our first predicate offense, and he was found guilty of Uh causing death was for firearm during the drug, trapping crime, which was ate in a bit, and for those that's when it lands. And that's it. 
+
+Speaker 2  (13:57)
+So I was found guilty of the drug conspiracy. The aid and the batting I got found guilty for McMahon is murder too. Which was the aid in the bitten? 
+
+Speaker 2  (14:05)
+And then Spain and hers 
+
+Speaker 1  (14:08)
+Okay. Does Mike have life in prison? 
+
+Speaker 2  (14:12)
+Yes, well, he had 35 years now. 
+
+Speaker 1  (14:16)
+Will he be getting out like you will 
+
+Speaker 2  (14:19)
+Yes, we both got our time reduced to 35 years in 23. 
+
+Speaker 1  (14:24)
+Okay? And Do you are you able? Are you eligible for parole? 
+
+Speaker 2  (14:29)
+Uh, now hipaa rolling in the federal system. 
+
+Speaker 1  (14:32)
+You can't get parole in the federal system. Is that what you said? 
+
+Speaker 2  (14:35)
+Nobody can. 
+
+Speaker 1  (14:36)
+Ah, okay, I feel like Ali's told me that, but okay. 
+
+Speaker 2  (14:43)
+Let's see. 
+
+Speaker 1  (14:54)
+Do you have any insight that you want to provide? How you were acquitted on state charges, but it was picked up on the federal charges like any insight you want to give anything that you'd really like to provide. 
+
+Speaker 2  (15:08)
+Oh, I would Um, I would say that. I am guilty of you know. The charge that I was, I was, I was allowed for I was guilty to a degree. 
+
+Speaker 2  (15:27)
+And however, I feel like, you know, both of my trials was unfair. It was, it was, it was a lot of lying in my trial from, you know, the government. 
+
+Speaker 1  (15:41)
+What did I lie about? 
+
+Speaker 2  (15:47)
+Pain witnesses. And stuff like that, most of the witnessing stuff was paid 
+
+Speaker 1  (15:52)
+Stayed by the government. 
+
+Speaker 2  (15:54)
+They was paid by the government. Mostly a lot of a lot of the guys like from my neighborhood who testified on me even McManus, he was paid 60 something $1000 star witness in my case Ern Butler. He was paid, and I feel like, you know, in both of my trials, the state and the government. 
+
+Speaker 2  (16:12)
+Allowed these witnesses to come in there and just blatantly lie. In correct, a lies, and I feel like, you know, the jewelry Was was it? Oh, yeah, I just I just feel like the jewelry. 
+
+Speaker 2  (16:33)
+Powell, like a lot of the jewelry instructions was explained to the drawry. The judge pretty much gave them even 2 options as like, you know, you can even find them guilty. Of this. 
+
+Speaker 2  (16:47)
+Like a lot of aid in the bedding, and I just feel like it was like very, very unfair. 
+
+Speaker 1  (16:53)
+Right. How did you find out they paid witnesses? 
+
+Speaker 2  (16:57)
+Because it uh, it came out during the outrial. 
+
+Speaker 1  (17:03)
+In I mean, isn't that is that's illegal, isn't it? 
+
+Speaker 2  (17:07)
+Not not in the federal system, it aint 
+
+Speaker 1  (17:09)
+Really? No, I did not know that see. II don't know much about 
+
+Speaker 2  (17:15)
+That results no 
+
+Speaker 1  (17:17)
+Sounds very corrupt. 
+
+Speaker 2  (17:19)
+And and it was also double jeopardy, too, because like in my state trial, I was actually charged with both of these murders, and they heard a lot of the same evidence in my federal trial that they had In my state trial, and it was like I was, I was put on trial 2 times for the same thing, and one of The Times I was actually found not guilty of all charges. 
+
+Speaker 1  (17:42)
+Wow, Okay, anything else that you want to say about that situation? 
+
+Speaker 2  (17:50)
+About Spain and hers. I just want to do apologize to these families. You know, their kids because, you know, everybody deserve, you know, dear father and I don't believe nobody's life should be, you know, taken in that regard like nobody regardless of like what you do in life. 
+
+Speaker 2  (18:12)
+Nobody deserved to be killed and so I do apologize to the family. You know, I apologize, you know, to my family. Because not only did it affect my family, I mean, not only did it affect their family like, you know, it affected my family too. 
+
+Speaker 2  (18:29)
+You know, I was being in prison. My son entire life, so I was removed from my family. So I just want to like, you know, apologize to, you know, everybody that I hurt everybody that I let down and disappointed and just let them know like I'm not that same person, no more like I learned from my steakside, you know, I grew because of them in one, they I'm hoping that I can you know, give back to like youth and you know, talk to them and show them like is a better way than you know. 
+
+Speaker 2  (19:03)
+A life in the streets because I'm a perfect example. Did you know you even gonna get life in prison or end up dead as most of my friends? I lost a lot of friends since I've been here. 
+
+Speaker 2  (19:16)
+So just That's that's for the most part I just want to Apologize to everybody that I heard 
+
+Speaker 1  (19:24)
+Right. Okay, um, and your girlfriend did come and see you in court like she would come and support you in court. 
+
+Speaker 2  (19:35)
+Which one? 
+
+Speaker 1  (19:37)
+Um, your baby's mom. 
+
+Speaker 2  (19:41)
+Rode my baby route. I don't want to put this in there because it's gonna. It's gonna cause a lot of but she ended up testifying on them. 
+
+Speaker 1  (19:49)
+Okay, but you don't want to say that, okay? Who was Aaron foster? 
+
+Speaker 2  (19:55)
+My other code descendant. I need like a close friend of mine too, so me iron and Mike. 
+
+Speaker 1  (20:03)
+Was he with you and Marcus and Mike? 
+
+Speaker 2  (20:07)
+No, he was he was actually incarcerated when that happened. 
+
+Speaker 1  (20:10)
+Why was he your code defendant? 
+
+Speaker 2  (20:16)
+He was charged with a latter. Well, he was charged with a conspiracy, so it was me. Her and Mike and then Marcus, who eventually testified no, he didn't testify, so initially when we got locked up markets was like 17, he pretty much started like telling on us. 
+
+Speaker 2  (20:33)
+So he wasn't around us for a while. So eventually he took back all his stance, and then he went to trial by himself. So a marked the markers eventually was going to be a government witness against us. 
+
+Speaker 2  (20:46)
+But he like changed the statements, and all that. But iron is, my iron is my other Cody. Finner and me irn and Mike is the ones who win the trial together. 
+
+Speaker 1  (20:55)
+Why did Aaron go to trial with you? I'm just trying to understand what his part in all of this was 
+
+Speaker 2  (21:01)
+See, he was charged with the drug was 
