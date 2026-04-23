@@ -399,7 +399,7 @@ export default function App() {
       </div>}
 
       {/* HEADER */}
-      {screen!=="welcome"&&<div style={{maxWidth:600,margin:"0 auto",padding:"20px 20px 0"}}>
+      {screen!=="welcome"&&<div style={{maxWidth:820,margin:"0 auto",padding:"20px 20px 0"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:screen==="chat"?0:20}}>
           <div style={{cursor:"pointer"}} onClick={goHome}>
             <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#A8884A",letterSpacing:"0.04em"}}>Forged Pen</div>
@@ -410,7 +410,7 @@ export default function App() {
       </div>}
 
       {/* HOME */}
-      {screen==="home"&&<div style={{maxWidth:600,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
+      {screen==="home"&&<div style={{maxWidth:820,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
         {/* Quote */}
         <div style={{textAlign:"center",padding:"4px 20px 16px"}}>
           <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,fontWeight:500,color:"#A8884A90",lineHeight:1.7}}>"{tk.q}"</div>
@@ -505,7 +505,7 @@ export default function App() {
       </div>}
 
       {/* SUBMENU */}
-      {screen==="submenu"&&<div style={{maxWidth:600,margin:"0 auto",padding:"0 20px 20px",animation:"fu .4s ease-out"}}>
+      {screen==="submenu"&&<div style={{maxWidth:820,margin:"0 auto",padding:"0 20px 20px",animation:"fu .4s ease-out"}}>
         <div onClick={goHome} style={{fontSize:12,color:"#6A6050",cursor:"pointer",marginBottom:16}}>Back</div>
         {subMenu==="workshop"&&<>
           <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#A8884A90",fontWeight:500,marginBottom:8}}>Coaching</div>
@@ -526,7 +526,7 @@ export default function App() {
       </div>}
 
       {/* STORY BIBLE SETUP */}
-      {screen==="setup"&&<div style={{maxWidth:600,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
+      {screen==="setup"&&<div style={{maxWidth:820,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
         <div onClick={goHome} style={{fontSize:12,color:"#6A6050",cursor:"pointer",marginBottom:16}}>Back</div>
         <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#5A7A8A",fontWeight:500,marginBottom:8}}>Story Bible</div>
         <p style={{fontSize:13,color:"#8A7E6A",marginBottom:16,lineHeight:1.6}}>Fill in what you can. Skip what you can't. Come back later. None of this has to be perfect.</p>
@@ -540,7 +540,7 @@ export default function App() {
       </div>}
 
       {/* STORY BIBLE VIEW */}
-      {screen==="project"&&project&&<div style={{maxWidth:600,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
+      {screen==="project"&&project&&<div style={{maxWidth:820,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
         <div onClick={goHome} style={{fontSize:12,color:"#6A6050",cursor:"pointer",marginBottom:16}}>Back</div>
         <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#5A7A8A",fontWeight:500,marginBottom:12}}>Story Bible</div>
         <div style={{display:"flex",gap:10,marginBottom:16}}>
@@ -556,7 +556,7 @@ export default function App() {
       </div>}
 
       {/* DAILY SPARK */}
-      {screen==="torch"&&<div style={{maxWidth:600,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
+      {screen==="torch"&&<div style={{maxWidth:820,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
         <div onClick={goHome} style={{fontSize:12,color:"#6A6050",cursor:"pointer",marginBottom:16}}>Back</div>
         <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#A8884A70",fontWeight:500,marginBottom:16}}>Daily Spark</div>
         <div style={{marginBottom:24,textAlign:"center"}}>
@@ -582,7 +582,7 @@ export default function App() {
       </div>}
 
       {/* CHAT */}
-      {screen==="chat"&&mode&&<div style={{maxWidth:isFocusMode?500:700,margin:"0 auto",display:"flex",flexDirection:"column",height:"calc(100vh - 60px)"}}>
+      {screen==="chat"&&mode&&<div style={{maxWidth:isFocusMode?600:700,margin:"0 auto",display:"flex",flexDirection:"column",height:"calc(100vh - 60px)"}}>
         {isFocusMode&&<div style={{textAlign:"center",padding:"8px 0",fontSize:10,color:"#5A7A5C80",letterSpacing:"0.1em"}}>FOCUS MODE</div>}
         {!isFocusMode&&<div style={{padding:"4px 20px 8px",fontSize:11,color:"#A8884A60"}}>{mode.label}</div>}
         <div style={{flex:1,overflow:"auto",padding:"8px 20px",display:"flex",flexDirection:"column",gap:14}}>
