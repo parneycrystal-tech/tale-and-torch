@@ -215,6 +215,7 @@ function WorldField({label,helper,example,k,value,onChange}){return <div style={
 function Btn({children,onClick,s}){return <button onClick={onClick} style={{background:"#1E1A16",border:"1px solid #2A2420",borderRadius:8,color:"#C8B8A0",fontSize:13,padding:"10px 16px",fontFamily:"'DM Sans',sans-serif",cursor:"pointer",...s}}>{children}</button>}
 function BibTab({id,label,active,onClick}){return <button onClick={()=>onClick(id)} style={{background:active?"#1E1A16":"none",border:active?"1px solid #2A2420":"1px solid transparent",borderRadius:8,color:active?"#A8884A":"#6A6050",fontSize:12,padding:"6px 14px",cursor:"pointer",fontFamily:"'DM Sans',sans-serif"}}>{label}</button>}
 
+
 export default function App() {
   const [mode, setMode] = useState(null);
   const [msgs, setMsgs] = useState([]);
@@ -231,7 +232,7 @@ export default function App() {
   const [lastSession, setLastSession] = useState(null);
   const [bibTab, setBibTab] = useState("overview");
   const [subMenu, setSubMenu] = useState(null);
-  const [sideOpen, setSideOpen] = useState(false);
+  const [lastThought, setLastThought] = useState(null);
   const endRef = useRef(null);
   const taRef = useRef(null);
   const abortRef = useRef(null);
@@ -258,9 +259,11 @@ export default function App() {
     const p = loadStored("tt-project");
     const s = loadStored("tt-sparks");
     const sess = loadStored("tt-session");
+    const lt = loadStored("tt-lastthought");
     if (p) setProject(p);
     if (s) setSparks(s);
     if (sess) setLastSession(sess);
+    if (lt) setLastThought(lt);
   },[]);
 
   useEffect(()=>{endRef.current?.scrollIntoView({behavior:"smooth"})},[msgs]);
@@ -286,15 +289,15 @@ export default function App() {
     } else { setMsgs([{role:"assistant",content:INTROS[mode.id]}]); }
   };
 
-  const goHome=()=>{cancelReq();setMode(null);setScreen("home");setSubMenu(null);setSideOpen(false);setMsgs([]);setInput("")};
+  const goHome=()=>{cancelReq();setMode(null);setScreen("home");setSubMenu(null);setMsgs([]);setInput("")};
   const getSmartRoute=()=>{
-    if(!project) return {msg:"Set up your Story Bible and let Finn learn your project.",action:null,label:"Set Up Story Bible",alt:null};
+    if(!project) return {msg:"Set up your Story Bible and let Finn learn your project.",action:null,label:"Set Up Story Bible"};
     const away=getTimeAway();
     const isLong=away&&(away.includes("day")||(away.includes("hour")&&parseInt(away)>=12));
-    if(isLong) return {msg:`You've been away ${away}. "${project.title}" waited. So did I. The embers are still warm.`,action:"rekindle",label:"Rekindle",alt:"forge"};
-    if(project.stuck&&project.stuck.trim()) return {msg:`You were stuck on: ${project.stuck}. Want to work through that, or has something shifted?`,action:"diagnose",label:"Work Through It",alt:"forge"};
-    if(project.where&&project.where.trim()) return {msg:`You're at ${project.where}. Ready to keep building?`,action:"forge",label:"Begin Writing Session",alt:null};
-    return {msg:"What do you want to work on today?",action:"forge",label:"Begin Session",alt:null};
+    if(isLong) return {msg:`You've been away ${away}. "${project.title}" waited. So did I. The embers are still warm.`,action:"rekindle",label:"Let's go"};
+    if(project.stuck&&project.stuck.trim()) return {msg:`You were stuck on: ${project.stuck}. Want to work through that, or has something shifted?`,action:"diagnose",label:"Let's go"};
+    if(project.where&&project.where.trim()) return {msg:`You're at ${project.where}. Ready to keep building?`,action:"forge",label:"Let's go"};
+    return {msg:"What do you want to work on today?",action:"forge",label:"Let's go"};
   };
   const cancelReq=()=>{if(abortRef.current){abortRef.current.abort();abortRef.current=null;setLoading(false)}};
   const sparkMsgs=["Saved. Future you will thank you for this.","Flagged. This is a breadcrumb back to the fire.","Noted. This one has heat.","Saved. When the smoke comes, this is your proof."];
@@ -302,6 +305,8 @@ export default function App() {
 
   const send=async()=>{
     if(!input.trim()||loading)return;
+    const userText=input.trim();
+    setLastThought(userText);saveStored("tt-lastthought",userText);
     const chapStr = project?.chapters ? (Array.isArray(project.chapters) ? project.chapters.filter(c=>c.summary).map(c=>`Ch${c.num}: ${c.summary}`).join(". ") : project.chapters) : "";
     const pCtx = project ? `\n\nPROJECT: "${project.title}". Genre: ${project.genre}. Synopsis: ${project.synopsis}. Protagonist: ${project.protagonist}. Supporting Characters: ${project.supporting}. Antagonist: ${project.antagonist}. Core Setting: ${project.worldSetting}. World Rules: ${project.worldRules}. What People Believe vs Reality: ${project.worldBeliefs}. What Makes This World Dangerous: ${project.worldDanger}. World Tone: ${project.worldTone}. Chapters so far: ${chapStr}. Current point: ${project.where}. Stuck on: ${project.stuck}. What excites them: ${project.excites}.${project.currentChapter?` CURRENT CHAPTER TEXT: ${project.currentChapter}`:""}` : "";
     const sparkCtx = sparks.length > 0 ? `\n\nDOPAMINE MAP (moments the writer flagged as exciting): ${sparks.map(s=>s.text).join(" | ")}` : "";
@@ -318,7 +323,7 @@ export default function App() {
       });
       if(snippets.length>0) containCtx=`\n\nRECENT CONVERSATIONS ACROSS ALL MODES (use these to synthesize):\n${snippets.join("\n")}`;
     }
-    const nm=[...msgs,{role:"user",content:input.trim()}];setMsgs(nm);setInput("");setLoading(true);
+    const nm=[...msgs,{role:"user",content:userText}];setMsgs(nm);setInput("");setLoading(true);
     const ctrl=new AbortController();abortRef.current=ctrl;
     try{
       const r=await fetch("/api/chat",{
@@ -346,252 +351,266 @@ export default function App() {
   const removeChapter=(idx)=>setPForm(prev=>({...prev,chapters:prev.chapters.filter((_,i)=>i!==idx).map((c,i)=>({...c,num:i+1}))}));
   const updateChapter=(idx,val)=>setPForm(prev=>({...prev,chapters:prev.chapters.map((c,i)=>i===idx?{...c,summary:val}:c)}));
 
-  const SB_ITEMS = [
-    {id:"_bible",label:"Story Bible",action:()=>project?setScreen("project"):setScreen("setup"),icon:<svg width="13" height="13" viewBox="0 0 13 13"><rect x="2" y="1" width="9" height="11" rx="1" fill="none" stroke="currentColor" strokeWidth="0.9"/><path d="M4.5 3.5h4M4.5 5.5h4M4.5 7.5h3" stroke="currentColor" strokeWidth="0.5" opacity="0.5"/></svg>},
-    {id:"_spark",label:"Daily Spark",action:()=>setScreen("torch"),icon:<svg width="13" height="13" viewBox="0 0 13 13"><path d="M6.5 1.5L7.5 4.5L10.5 4.5L8 6.5L9 9.5L6.5 7.5L4 9.5L5 6.5L2.5 4.5L5.5 4.5Z" fill="none" stroke="currentColor" strokeWidth="0.7"/></svg>},
-    {id:"_contain",label:"Contain",action:()=>pick(MODES.find(m=>m.id==="contain")),icon:<svg width="13" height="13" viewBox="0 0 13 13"><circle cx="6.5" cy="6.5" r="4.5" fill="none" stroke="currentColor" strokeWidth="0.7"/><path d="M4 6.5c1.2-2 3.8-2 5 0c-1.2 2-3.8 2-5 0z" fill="currentColor" opacity="0.12"/></svg>},
-    {id:"_sep1"},
-    {id:"_coaching",label:"Coaching",action:()=>{setSubMenu("workshop");setScreen("submenu");setSideOpen(false)},icon:<svg width="13" height="13" viewBox="0 0 13 13"><path d="M3 10L6.5 2.5L10 10" fill="none" stroke="currentColor" strokeWidth="0.9"/><circle cx="6.5" cy="7.5" r="0.9" fill="currentColor" opacity="0.3"/></svg>},
-    {id:"_neuro",label:"Neurodivergent",action:()=>{setSubMenu("neuro");setScreen("submenu");setSideOpen(false)},icon:<svg width="13" height="13" viewBox="0 0 13 13"><circle cx="4.5" cy="4.5" r="2.5" fill="none" stroke="currentColor" strokeWidth="0.7"/><circle cx="8.5" cy="8.5" r="2.5" fill="none" stroke="currentColor" strokeWidth="0.7"/></svg>},
-    {id:"_sep2"},
-    {id:"_forge",label:"Forge",action:()=>pick(MODES.find(m=>m.id==="forge")),icon:<svg width="13" height="13" viewBox="0 0 13 13"><path d="M6.5 1l1.2 3.5L6.5 11.5 5.3 4.5z" fill="none" stroke="currentColor" strokeWidth="0.7"/><rect x="5" y="11" width="3" height="1.2" rx="0.3" fill="currentColor" opacity="0.3"/></svg>},
-    {id:"_inferno",label:"Inferno",action:()=>pick(MODES.find(m=>m.id==="inferno")),icon:<svg width="13" height="13" viewBox="0 0 13 13"><path d="M6.5 1.5c1.8 1.8 3.5 3.5 2.3 6.5c-1 2.2-2 1.8-2.3 1.8s-1.3.4-2.3-1.8c-1.2-3 .5-4.7 2.3-6.5z" fill="currentColor" opacity="0.1" stroke="currentColor" strokeWidth="0.7"/></svg>},
-    {id:"_simmer",label:"Simmer",action:()=>pick(MODES.find(m=>m.id==="simmer")),icon:<svg width="13" height="13" viewBox="0 0 13 13"><ellipse cx="6.5" cy="9" rx="4" ry="2.2" fill="none" stroke="currentColor" strokeWidth="0.7"/><path d="M3.5 9c0-3 1.2-4.5 3-4.5s3 1.5 3 4.5" fill="none" stroke="currentColor" strokeWidth="0.7"/></svg>},
-    {id:"_rekindle",label:"Rekindle",action:()=>project?pick(MODES.find(m=>m.id==="rekindle")):null,icon:<svg width="13" height="13" viewBox="0 0 13 13"><path d="M6.5 2L7.5 4.5L10 4.5L8 6.5L9 9.5L6.5 7.5L4 9.5L5 6.5L3 4.5L5.5 4.5Z" fill="none" stroke="currentColor" strokeWidth="0.6"/></svg>,disabled:!project},
-  ];
-
-  const sideItem = (item) => {
-    if(item.id.startsWith("_sep")) return <div key={item.id} style={{height:1,background:"#1E1A16",margin:"10px 0"}}/>;
-    const active = (screen==="project"&&item.id==="_bible") || (screen==="torch"&&item.id==="_spark") || (screen==="submenu"&&subMenu==="workshop"&&item.id==="_coaching") || (screen==="submenu"&&subMenu==="neuro"&&item.id==="_neuro") || (mode&&mode.id==="forge"&&item.id==="_forge") || (mode&&mode.id==="inferno"&&item.id==="_inferno") || (mode&&mode.id==="simmer"&&item.id==="_simmer") || (mode&&mode.id==="rekindle"&&item.id==="_rekindle") || (mode&&mode.id==="contain"&&item.id==="_contain");
-    return <div key={item.id} onClick={()=>{if(!item.disabled){item.action();setSideOpen(false)}}} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 10px",borderRadius:6,cursor:item.disabled?"default":"pointer",opacity:item.disabled?.4:1,background:active?"#A8884A0A":"transparent",borderLeft:active?"2px solid #A8884A60":"2px solid transparent",color:active?"#D8C8AA":"#8A7E6A",transition:"background .2s"}}><span style={{color:active?"#A8884A":"#6A6050",display:"flex"}}>{item.icon}</span><span style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,fontWeight:active?500:400}}>{item.label}</span></div>;
-  };
-
-  const rightSidebar = () => (
-    <div style={{background:"#141210",borderLeft:"1px solid #1E1A16",padding:"24px 16px",overflowY:"auto"}}>
-      {project?<>
-        <div style={{marginBottom:20}}>
-          <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:8,textTransform:"uppercase",letterSpacing:"0.22em",color:"#6A6050",fontWeight:500,marginBottom:10}}>Current project</div>
-          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:600,color:"#D8C8AA"}}>{project.title||"Untitled"}</div>
-          {project.genre&&<div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:12,color:"#8A7E6A",fontStyle:"italic",marginTop:3}}>{project.genre}</div>}
-          {project.where&&<div style={{marginTop:12}}><div style={{fontFamily:"'DM Sans',sans-serif",fontSize:10,color:"#8A7E6A",marginBottom:6}}>{project.where}</div><div style={{background:"#221E1A",borderRadius:2,height:2,overflow:"hidden"}}><div style={{background:"#A8884A60",height:"100%",width:"35%",borderRadius:2}}/></div></div>}
-        </div>
-        <div style={{height:1,background:"#1E1A16",marginBottom:16}}/>
-        {project.stuck&&project.stuck.trim()&&<><div style={{marginBottom:20}}><div style={{fontFamily:"'DM Sans',sans-serif",fontSize:8,textTransform:"uppercase",letterSpacing:"0.22em",color:"#6A6050",fontWeight:500,marginBottom:10}}>Working on</div><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#A89880",lineHeight:1.7}}>{project.stuck}</div></div><div style={{height:1,background:"#1E1A16",marginBottom:16}}/></>}
-      </>:<div style={{marginBottom:20}}><div style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,color:"#6A6050"}}>No project yet. Set up your Story Bible to get started.</div></div>}
-      <div style={{marginBottom:20}}>
-        <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:8,textTransform:"uppercase",letterSpacing:"0.22em",color:"#A8884A50",fontWeight:500,marginBottom:10}}>Finn</div>
-        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13.5,color:"#8A7E6A",lineHeight:1.7,fontStyle:"italic"}}>You don't need more ideas. You need to finish one.</div>
-      </div>
-      {sparks.length>0&&<><div style={{height:1,background:"#1E1A16",marginBottom:16}}/><div><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><div style={{fontFamily:"'DM Sans',sans-serif",fontSize:8,textTransform:"uppercase",letterSpacing:"0.22em",color:"#A8884A50",fontWeight:500}}>Dopamine map</div><div style={{fontFamily:"'DM Sans',sans-serif",fontSize:10,color:"#6A6050"}}>{sparks.length} spark{sparks.length>1?"s":""}</div></div><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:12,color:"#8A7E6A",fontStyle:"italic",lineHeight:1.6}}>"{sparks[sparks.length-1]?.text}"</div></div></>}
-    </div>
-  );
-
-  const centerContent = () => {
-    if(screen==="home"){
-      const route=getSmartRoute();
-      return <div style={{padding:"32px 36px",animation:"fu .5s ease-out"}}>
-        <div style={{marginBottom:24}}>
-          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,fontStyle:"italic",color:"#A8884A70",lineHeight:1.7}}>"{tk.q}"</div>
-          <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:10,color:"#6A6050",marginTop:6}}>{tk.a}</div>
-        </div>
-        <div style={{height:1,background:"#221E1A",marginBottom:24}}/>
-        <div>
-          <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#A8884A90",fontWeight:500,marginBottom:16}}>Finn's read</div>
-          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:400,color:"#D8C8AA",lineHeight:1.7,marginBottom:24}}>{route.msg}</div>
-          {route.action?<><div onClick={()=>pick(MODES.find(m=>m.id===route.action))} style={{background:"#A8884A",border:"none",borderRadius:8,padding:"13px 24px",cursor:"pointer",textAlign:"center"}}><span style={{fontFamily:"'DM Sans',sans-serif",fontSize:12,fontWeight:500,color:"#0F0E0C",letterSpacing:"0.03em"}}>Let's go</span></div><div style={{textAlign:"center",marginTop:10}}><span onClick={goHome} style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,color:"#6A6050",cursor:"pointer"}}>I need something different today</span></div></>:<div onClick={()=>setScreen("setup")} style={{background:"#A8884A",border:"none",borderRadius:8,padding:"13px 24px",cursor:"pointer",textAlign:"center"}}><span style={{fontFamily:"'DM Sans',sans-serif",fontSize:12,fontWeight:500,color:"#0F0E0C",letterSpacing:"0.03em"}}>{route.label}</span></div>}
-        </div>
-      </div>;
-    }
-    if(screen==="torch"){
-      return <div style={{padding:"32px 36px",animation:"fu .5s ease-out"}}>
-        <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#A8884A70",fontWeight:500,marginBottom:16}}>Daily Spark</div>
-        <div style={{marginBottom:24}}>
-          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontStyle:"italic",color:"#A8884A70",lineHeight:1.7}}>"{tk.q}"</div>
-          <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:10,color:"#6A6050",marginTop:8}}>{tk.a}</div>
-        </div>
-        <div style={{background:"#1E1A16",border:"1px solid #2A2420",borderRadius:10,padding:"14px 18px",marginBottom:16}}>
-          <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:8,textTransform:"uppercase",letterSpacing:"0.15em",color:"#A8884A70",fontWeight:500,marginBottom:6}}>Today's Prompt</div>
-          <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:15,color:"#C8B8A0",lineHeight:1.7,fontStyle:"italic"}}>{tk.p}</p>
-        </div>
-        <div className="cp" onClick={()=>setFlipped(!flipped)} style={{background:flipped?"#1E1A16":"linear-gradient(135deg,#201A28,#1A1620)",border:"1px solid "+(flipped?"#2A2420":"#302840"),borderRadius:10,padding:"18px",textAlign:"center",cursor:"pointer"}}>
-          {!flipped?<div><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,color:"#9A8AB0",fontWeight:600}}>Pull Today's Card</div></div>
-          :<div style={{textAlign:"left",animation:"fi .6s ease-out"}}>
-            <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:8,textTransform:"uppercase",letterSpacing:"0.15em",color:"#7A6EA0",fontWeight:500,marginBottom:6}}>Today's Card</div>
-            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:19,color:"#D8C8AA",fontWeight:600,marginBottom:8}}>{tk.cn}</div>
-            <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#8A7E6A",lineHeight:1.7,marginBottom:12}}>{tk.cl}</p>
-            <div style={{background:"#161412",borderRadius:8,padding:"10px 12px"}}>
-              <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:8,textTransform:"uppercase",letterSpacing:"0.12em",color:"#A8884A70",fontWeight:500,marginBottom:4}}>Micro-Challenge</div>
-              <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#C8B8A0",lineHeight:1.6}}>{tk.cx}</p>
-            </div>
-          </div>}
-        </div>
-      </div>;
-    }
-    if(screen==="submenu"){
-      return <div style={{padding:"32px 36px",animation:"fu .4s ease-out"}}>
-        {subMenu==="workshop"&&<>
-          <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#A8884A90",fontWeight:500,marginBottom:8}}>Coaching</div>
-          <p style={{fontFamily:"'DM Sans',sans-serif",fontSize:13,color:"#8A7E6A",marginBottom:20,lineHeight:1.6}}>Bring your work. Finn will find what's strong, name what's off, and help you see what you missed.</p>
-          {MODES.filter(m=>m.cat==="craft"||m.cat==="intuition").map(m=><div key={m.id} onClick={()=>pick(m)} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:"#1E1A16",border:"1px solid #2A2420",borderRadius:8,marginBottom:6,cursor:"pointer"}}><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,fontWeight:600,color:"#D8C8AA"}}>{m.label}</div><div style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,color:"#6A6050",marginLeft:"auto"}}>{m.sub}</div></div>)}
-        </>}
-        {subMenu==="neuro"&&<>
-          <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#5A7A5C90",fontWeight:500,marginBottom:8}}>Neurodivergent Support</div>
-          <p style={{fontFamily:"'DM Sans',sans-serif",fontSize:13,color:"#8A7E6A",marginBottom:20,lineHeight:1.6}}>For when your brain is the obstacle, not your story.</p>
-          {MODES.filter(m=>m.cat==="neuro").map(m=><div key={m.id} onClick={()=>pick(m)} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:"#1E1A16",border:"1px solid #2A2420",borderRadius:8,marginBottom:6,cursor:"pointer"}}><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,fontWeight:600,color:"#D8C8AA"}}>{m.label}</div><div style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,color:"#6A6050",marginLeft:"auto"}}>{m.sub}</div></div>)}
-        </>}
-      </div>;
-    }
-    if(screen==="setup"){
-      return <div style={{padding:"32px 36px",animation:"fu .5s ease-out",maxWidth:640}}>
-        <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#5A7A8A",fontWeight:500,marginBottom:8}}>Story Bible</div>
-        <p style={{fontFamily:"'DM Sans',sans-serif",fontSize:13,color:"#8A7E6A",marginBottom:16,lineHeight:1.6}}>Fill in what you can. Skip what you can't. Come back later. None of this has to be perfect.</p>
-        <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}><BibTab id="overview" label="Overview" active={bibTab==="overview"} onClick={setBibTab}/><BibTab id="characters" label="Characters" active={bibTab==="characters"} onClick={setBibTab}/><BibTab id="world" label="World" active={bibTab==="world"} onClick={setBibTab}/><BibTab id="chapters" label="Chapters" active={bibTab==="chapters"} onClick={setBibTab}/><BibTab id="current" label="Current Chapter" active={bibTab==="current"} onClick={setBibTab}/></div>
-        {bibTab==="overview"&&<><FormField label="Project title" k="title" ph="My Novel" value={pForm.title} onChange={updateField}/><FormField label="Genre" k="genre" ph="Contemporary fiction, fantasy, memoir..." value={pForm.genre} onChange={updateField}/><FormField label="Synopsis (the whole arc, spoilers welcome)" k="synopsis" ph="The full story..." value={pForm.synopsis} onChange={updateField} multi/><FormField label="Where are you right now?" k="where" ph="Chapter 3, the confrontation scene" value={pForm.where} onChange={updateField}/><FormField label="What are you stuck on?" k="stuck" ph="If you don't know, that counts as an answer." value={pForm.stuck} onChange={updateField}/><FormField label="What excites you most about this project?" k="excites" ph="The slow burn, the world, the voice..." value={pForm.excites} onChange={updateField} multi/></>}
-        {bibTab==="characters"&&<><FormField label="Protagonist" k="protagonist" ph="Name, age, core trait, internal conflict, arc..." value={pForm.protagonist} onChange={updateField} multi/><FormField label="Supporting Characters" k="supporting" ph="One per paragraph works best..." value={pForm.supporting} onChange={updateField} multi/><FormField label="Antagonist" k="antagonist" ph="Person, force, or system..." value={pForm.antagonist} onChange={updateField} multi/></>}
-        {bibTab==="world"&&<><WorldField label="Core Setting" helper="When and where does this story take place?" example="Northern Michigan, late summer..." k="worldSetting" value={pForm.worldSetting} onChange={updateField}/><WorldField label="World Rules" helper="What can and cannot happen here?" example="Magic exists but only in children..." k="worldRules" value={pForm.worldRules} onChange={updateField}/><WorldField label="Beliefs vs. Reality" helper="What do characters assume that isn't true?" example="The town believes the fires are natural..." k="worldBeliefs" value={pForm.worldBeliefs} onChange={updateField}/><WorldField label="What Makes This World Dangerous" helper="What creates real stakes?" example="If Emma uses too much magic..." k="worldDanger" value={pForm.worldDanger} onChange={updateField}/><WorldField label="Tone" helper="What does this world feel like?" example="Warm but uneasy..." k="worldTone" value={pForm.worldTone} onChange={updateField}/></>}
-        {bibTab==="chapters"&&<><p style={{fontFamily:"'DM Sans',sans-serif",fontSize:12,color:"#8A7E6A",marginBottom:14,lineHeight:1.5}}>One field per chapter. Keep summaries short.</p>{pForm.chapters.map((ch,idx)=><div key={idx} style={{marginBottom:14}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:5}}><label style={{fontFamily:"'DM Sans',sans-serif",fontSize:13,color:"#A8884A",fontWeight:600}}>Chapter {ch.num}</label>{pForm.chapters.length>1&&<span onClick={()=>removeChapter(idx)} style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,color:"#6A6050",cursor:"pointer"}}>Remove</span>}</div><textarea className="fi" rows={2} placeholder={`What happens in chapter ${ch.num}...`} value={ch.summary} onChange={e=>updateChapter(idx,e.target.value)} style={{resize:"vertical",fontSize:13}}/></div>)}<Btn onClick={addChapter} s={{width:"100%",background:"none",borderStyle:"dashed",borderColor:"#2A2420",color:"#8A7E6A",marginBottom:8}}>+ Add Chapter</Btn></>}
-        {bibTab==="current"&&<><p style={{fontFamily:"'DM Sans',sans-serif",fontSize:12,color:"#8A7E6A",marginBottom:8,lineHeight:1.5}}>Paste the chapter you're currently working on. Finn will reference this text directly.</p><FormField label="Current chapter text" k="currentChapter" ph="Paste your current chapter here..." value={pForm.currentChapter} onChange={updateField} multi/></>}
-        <Btn onClick={handleSetup} s={{width:"100%",background:"#A8884A20",borderColor:"#A8884A40",fontWeight:600,marginTop:8}}>{project?"Update":"Save"} Story Bible</Btn>
-      </div>;
-    }
-    if(screen==="project"&&project){
-      return <div style={{padding:"32px 36px",animation:"fu .5s ease-out"}}>
-        <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#5A7A8A",fontWeight:500,marginBottom:12}}>Story Bible</div>
-        <div style={{display:"flex",gap:10,marginBottom:16}}>
-          <Btn onClick={()=>{const pf={...project};if(!Array.isArray(pf.chapters))pf.chapters=pf.chapters?[{num:1,summary:pf.chapters}]:[{num:1,summary:""}];setPForm(pf);setScreen("setup")}} s={{flex:1}}>Edit</Btn>
-          <Btn onClick={()=>pick(MODES.find(m=>m.id==="rekindle"))} s={{flex:1,background:"#A8884A15"}}>Rekindle</Btn>
-        </div>
-        {sparks.length>0&&<div style={{marginBottom:16}}><div style={{fontFamily:"'DM Sans',sans-serif",fontSize:8,textTransform:"uppercase",letterSpacing:"0.15em",color:"#A8884A70",fontWeight:500,marginBottom:10}}>Dopamine Map ({sparks.length})</div>{sparks.map((s,i)=><div key={i} style={{background:"#1E1A16",border:"1px solid #2A2420",borderRadius:8,padding:"10px 14px",marginBottom:6}}><p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:12,color:"#C8B8A0",lineHeight:1.5}}>"{s.text}"</p><p style={{fontFamily:"'DM Sans',sans-serif",fontSize:9,color:"#4A4238",marginTop:4}}>{s.date}</p></div>)}</div>}
-        <div style={{background:"#1E1A16",border:"1px solid #2A2420",borderRadius:10,padding:"20px"}}>
-          <h3 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,color:"#D8C8AA",marginBottom:14}}>{project.title||"Untitled"}</h3>
-          {[["Genre",project.genre],["Synopsis",project.synopsis],["Protagonist",project.protagonist],["Supporting",project.supporting],["Antagonist",project.antagonist],["Setting",project.worldSetting],["Rules",project.worldRules],["Beliefs vs Reality",project.worldBeliefs],["Danger",project.worldDanger],["Tone",project.worldTone],["Position",project.where],["Stuck on",project.stuck],["Excites you",project.excites]].map(([l,v])=>v?<div key={l} style={{marginBottom:10}}><p style={{fontFamily:"'DM Sans',sans-serif",fontSize:9,textTransform:"uppercase",letterSpacing:"0.12em",color:"#6A6050",fontWeight:500,marginBottom:3}}>{l}</p><p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#C8B8A0",lineHeight:1.6}}>{v}</p></div>:null)}
-          {project.chapters&&Array.isArray(project.chapters)&&project.chapters.some(c=>c.summary)&&<div style={{marginBottom:10}}><p style={{fontFamily:"'DM Sans',sans-serif",fontSize:9,textTransform:"uppercase",letterSpacing:"0.12em",color:"#6A6050",fontWeight:500,marginBottom:6}}>Chapters</p>{project.chapters.filter(c=>c.summary).map((c,i)=><p key={i} style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#C8B8A0",lineHeight:1.6,marginBottom:4}}><span style={{color:"#A8884A",fontWeight:600}}>Ch{c.num}:</span> {c.summary}</p>)}</div>}
-        </div>
-      </div>;
-    }
-    if(screen==="chat"&&mode){
-      return <div style={{display:"flex",flexDirection:"column",height:"100%"}}>
-        <div style={{flex:1,overflow:"auto",padding:"20px 28px",display:"flex",flexDirection:"column",gap:16}}>
-          {msgs.map((m,i)=><div key={i} className={m.role==="assistant"?"ma":"mu"} style={{display:"flex",width:"100%",justifyContent:m.role==="user"?"flex-end":"flex-start"}}>
-            <div style={{maxWidth:"88%",borderRadius:14,padding:"14px 18px",lineHeight:1.65,fontSize:14,...(m.role==="user"?{background:"#221E1A",border:"1px solid #2A2420",borderTopRightRadius:4}:{background:"#1E1A16",border:"1px solid #2A2420",borderTopLeftRadius:4})}}>
-              {m.role==="assistant"&&<div style={{fontFamily:"'DM Sans',sans-serif",fontSize:10,fontWeight:500,color:CATS[mode.cat]?.c||"#A8884A",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:8}}>Finn</div>}
-              <div style={{fontFamily:"'Cormorant Garamond',serif",color:"#C8B8A0",fontSize:15,lineHeight:1.7}}>{m.content.split("\n").map((l,j)=><p key={j} style={{marginBottom:l?10:4,minHeight:l?undefined:4}}>{l}</p>)}</div>
-              {m.role==="assistant"&&i>0&&<>{flaggedIdx===i?<span style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,color:"#A8884A",fontStyle:"italic",marginTop:8,display:"block"}}>{sparkMsgs[Math.floor(Math.random()*sparkMsgs.length)]}</span>:<button onClick={()=>flagSpark(m.content,i)} style={{background:"none",border:"1px solid #2A2420",borderRadius:6,color:"#6A6050",fontFamily:"'DM Sans',sans-serif",fontSize:10,padding:"4px 10px",marginTop:8,cursor:"pointer"}}>This excites me</button>}</>}
-            </div>
-          </div>)}
-          {loading&&<div className="ma" style={{display:"flex",width:"100%",alignItems:"flex-start",gap:8}}>
-            <div style={{maxWidth:"88%",borderRadius:14,padding:"14px 18px",background:"#1E1A16",border:"1px solid #2A2420",borderTopLeftRadius:4,flex:1}}>
-              <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:10,fontWeight:500,color:CATS[mode.cat]?.c||"#A8884A",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:8}}>Finn</div>
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:13,color:"#6A6050",fontStyle:"italic"}}>{loadMsg}</span>
-                <span style={{display:"flex",gap:4}}>{[0,.3,.6].map(d=><span key={d} style={{color:"#A8884A",fontSize:8,animation:"pu 1.2s ease-in-out infinite",animationDelay:`${d}s`}}>&#9679;</span>)}</span>
-              </div>
-            </div>
-            <button onClick={cancelReq} style={{background:"#1E1A16",border:"1px solid #2A2420",borderRadius:6,color:"#6A6050",fontFamily:"'DM Sans',sans-serif",fontSize:10,padding:"6px 10px",cursor:"pointer",flexShrink:0}}>Stop</button>
-          </div>}
-          <div ref={endRef}/>
-        </div>
-        <div style={{padding:"12px 20px 20px",borderTop:"1px solid #1E1A16",background:"#161412"}}>
-          <div style={{display:"flex",gap:10,alignItems:"flex-end",background:"#1E1A16",border:"1px solid #2A2420",borderRadius:14,padding:"10px 14px"}}>
-            <textarea ref={taRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}}} placeholder={mode.ph} style={{flex:1,background:"none",border:"none",outline:"none",color:"#D8C8AA",fontFamily:"'Cormorant Garamond',serif",fontSize:15,lineHeight:1.6,resize:"none",maxHeight:200}} rows={1}/>
-            <button className="sb" onClick={send} disabled={!input.trim()||loading} style={{width:34,height:34,borderRadius:8,border:"none",background:"#A8884A",color:"#0F0E0C",fontSize:16,fontWeight:700,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",opacity:!input.trim()||loading?.3:1}}>{"\u2191"}</button>
-          </div>
-          <div style={{display:"flex",justifyContent:"space-between",marginTop:6}}><p style={{fontFamily:"'DM Sans',sans-serif",fontSize:9,color:"#3A3430"}}>Shift+Enter for new line</p><p onClick={newChat} style={{fontFamily:"'DM Sans',sans-serif",fontSize:9,color:"#5A7A8A",cursor:"pointer"}}>New chat</p></div>
-        </div>
-      </div>;
-    }
-    return null;
-  };
+  const isFocusMode = mode && (mode.id==="micro"||mode.id==="smoke");
 
   return (
-    <div style={{fontFamily:"'DM Sans',sans-serif",background:"#161412",color:"#D8C8AA",minHeight:"100vh"}}>
+    <div style={{fontFamily:"'DM Sans',sans-serif",background:"#121010",color:"#D8C8AA",minHeight:"100vh"}}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
-        *{box-sizing:border-box;margin:0;padding:0}body{background:#161412}
+        *{box-sizing:border-box;margin:0;padding:0}body{background:#121010}
         ::selection{background:#A8884A30}textarea::placeholder,input::placeholder{color:#6A6050;font-style:italic}
         @keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fi{from{opacity:0}to{opacity:1}}
         @keyframes pu{0%,100%{opacity:.3}50%{opacity:.8}}
+        @keyframes wp{0%,100%{opacity:.55}50%{opacity:1}}
         .ma,.mu{animation:fu .4s ease-out}
+        .card{background:#1A1816;border:1px solid #221E1A;border-radius:10px;padding:16px;cursor:pointer;transition:all .25s}
+        .card:hover{border-color:#A8884A30;transform:translateY(-1px)}
         .sb{transition:all .2s}.sb:hover:not(:disabled){transform:scale(1.03);filter:brightness(1.1)}
         .cp{cursor:pointer;transition:all .4s}.cp:hover{transform:scale(1.01)}
-        .fi{background:#1E1A16;border:1px solid #2A2420;border-radius:8px;padding:10px 14px;color:#D8C8AA;font-family:'Cormorant Garamond',serif;font-size:15px;width:100%;outline:none}.fi:focus{border-color:#A8884A40}
-        @media(max-width:768px){.desk-only{display:none!important}.mob-show{display:flex!important}}
+        .fi{background:#1A1816;border:1px solid #221E1A;border-radius:8px;padding:10px 14px;color:#D8C8AA;font-family:'Cormorant Garamond',serif;font-size:15px;width:100%;outline:none}.fi:focus{border-color:#A8884A40}
       `}</style>
 
       {/* WELCOME */}
-      {screen==="welcome"&&<div onClick={()=>{saveSession(null);setScreen("home")}} style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"#161412",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:24,cursor:"pointer"}}>
+      {screen==="welcome"&&<div onClick={()=>{saveSession(null);setScreen("home")}} style={{position:"fixed",top:0,left:0,right:0,bottom:0,background:"#121010",zIndex:200,display:"flex",alignItems:"center",justifyContent:"center",padding:24,cursor:"pointer"}}>
         <div style={{maxWidth:480,textAlign:"center",animation:"fi .6s ease-out"}}>
           <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:28,fontWeight:600,color:"#A8884A",marginBottom:6}}>Forged Pen</div>
           {project?<>
             {(()=>{
               const away = getTimeAway();
-              const hasStuck = project.stuck && project.stuck.trim();
-              const hasWhere = project.where && project.where.trim();
-              const sparkCount = sparks.length;
               const isLongAway = away && (away.includes("day") || (away.includes("hour") && parseInt(away)>=12));
               return <>
                 <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,color:"#C8B8A0",lineHeight:1.8,marginBottom:8,marginTop:16}}>
                   "{project.title}" is right where you left it.{away ? ` It's been ${away}.` : ""}
                 </p>
-                {hasWhere&&<p style={{fontFamily:"'DM Sans',sans-serif",fontSize:13,color:"#8A7E6A",lineHeight:1.7,marginBottom:6}}>{project.where}</p>}
-                {hasStuck&&<p style={{fontFamily:"'DM Sans',sans-serif",fontSize:13,color:"#8A7E6A",lineHeight:1.7,marginBottom:6}}>Stuck on: {project.stuck}</p>}
-                {sparkCount>0&&<p style={{fontFamily:"'DM Sans',sans-serif",fontSize:12,color:"#A8884A80",marginBottom:6}}>{sparkCount} spark{sparkCount>1?"s":""} saved</p>}
+                {project.where&&<p style={{fontSize:13,color:"#8A7E6A",lineHeight:1.7,marginBottom:6}}>{project.where}</p>}
+                {project.stuck&&project.stuck.trim()&&<p style={{fontSize:13,color:"#8A7E6A",lineHeight:1.7,marginBottom:6}}>Stuck on: {project.stuck}</p>}
+                {sparks.length>0&&<p style={{fontSize:12,color:"#A8884A80",marginBottom:6}}>{sparks.length} spark{sparks.length>1?"s":""} saved</p>}
                 <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:15,color:"#C8B8A0",lineHeight:1.8,marginTop:16,marginBottom:24}}>{isLongAway?"No guilt. The project waited. So did I.":"Let's get to work."}</p>
               </>;
             })()}
           </>:<>
-            <p style={{fontFamily:"'DM Sans',sans-serif",fontSize:12,color:"#6A6050",marginTop:4,marginBottom:20}}>Your writing coach, not your ghostwriter</p>
+            <p style={{fontSize:12,color:"#6A6050",marginTop:4,marginBottom:20}}>Your writing coach, not your ghostwriter</p>
             <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,color:"#C8B8A0",lineHeight:1.8,marginBottom:8}}>Hey. I'm Finnigan. But call me Finn.</p>
             <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:15,color:"#8A7E6A",lineHeight:1.8,marginBottom:24}}>I ask the question you've been circling around, you realize you knew the answer the whole time, then you go write something extraordinary.</p>
           </>}
-          <p style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,color:"#4A4238"}}>Tap anywhere to begin</p>
+          <p style={{fontSize:11,color:"#4A4238"}}>Tap anywhere to begin</p>
         </div>
       </div>}
 
-      {/* MAIN LAYOUT */}
-      {screen!=="welcome"&&<div style={{display:"grid",gridTemplateColumns:"168px 1fr 195px",minHeight:"100vh"}}>
-        
-        {/* MOBILE HAMBURGER */}
-        <div className="mob-show" style={{display:"none",position:"fixed",top:12,left:12,zIndex:150,background:"#1E1A16",border:"1px solid #2A2420",borderRadius:6,padding:"8px 10px",cursor:"pointer"}} onClick={()=>setSideOpen(!sideOpen)}>
-          <svg width="18" height="12" viewBox="0 0 18 12"><path d="M0 1h18M0 6h18M0 11h18" stroke="#A8884A" strokeWidth="1.2"/></svg>
+      {/* HEADER */}
+      {screen!=="welcome"&&<div style={{maxWidth:600,margin:"0 auto",padding:"20px 20px 0"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:screen==="chat"?0:20}}>
+          <div style={{cursor:"pointer"}} onClick={goHome}>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#A8884A",letterSpacing:"0.04em"}}>Forged Pen</div>
+            <div style={{fontSize:9,color:"#6A6050",letterSpacing:"0.08em",marginTop:3}}>YOUR WRITING COACH, NOT YOUR GHOSTWRITER</div>
+          </div>
+          {screen==="chat"&&mode&&<span onClick={goHome} style={{fontSize:12,color:"#6A6050",cursor:"pointer",padding:"4px 0"}}>Back</span>}
+        </div>
+      </div>}
+
+      {/* HOME */}
+      {screen==="home"&&<div style={{maxWidth:600,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
+        {/* Quote */}
+        <div style={{textAlign:"center",padding:"4px 20px 16px"}}>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,fontWeight:500,color:"#A8884A90",lineHeight:1.7}}>"{tk.q}"</div>
+          <div style={{fontSize:10,color:"#6A6050",marginTop:5}}>{tk.a}</div>
         </div>
 
-        {/* LEFT SIDEBAR */}
-        <div className="desk-only" style={{background:"#141210",borderRight:"1px solid #1E1A16",padding:"24px 14px",display:"flex",flexDirection:"column",position:"sticky",top:0,height:"100vh",overflowY:"auto"}}>
-          <div style={{marginBottom:32,cursor:"pointer"}} onClick={goHome}>
-            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:600,color:"#A8884A",letterSpacing:"0.04em"}}>Forged Pen</div>
-            <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:7.5,color:"#6A6050",letterSpacing:"0.08em",marginTop:4,lineHeight:1.4}}>YOUR WRITING COACH,<br/>NOT YOUR GHOSTWRITER</div>
-          </div>
-          <div style={{display:"flex",flexDirection:"column",gap:1,flex:1}}>{SB_ITEMS.map(sideItem)}</div>
-          <div style={{marginTop:"auto",paddingTop:12,borderTop:"1px solid #1E1A16"}}>
-            <div style={{fontFamily:"'DM Sans',sans-serif",fontSize:7.5,color:"#3A3430",lineHeight:1.5}}>Forged Pen is a writing craft tool, not a mental health service or diagnostic tool. If you are in crisis, please reach out to a qualified professional.</div>
-          </div>
-        </div>
+        {/* Finn's Read */}
+        {(()=>{const route=getSmartRoute();return <div style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:12,padding:24,marginBottom:12,position:"relative"}}>
+          <div style={{position:"absolute",top:0,left:24,right:24,height:1,background:"linear-gradient(90deg,transparent,#A8884A20,transparent)"}}/>
+          {project&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+            <div style={{fontSize:9,color:"#6A6050",letterSpacing:"0.1em"}}>{project.title?.toUpperCase()}</div>
+            {project.where&&<div style={{fontSize:9,color:"#4A4238"}}>{project.where}</div>}
+          </div>}
+          <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#A8884A80",fontWeight:500,marginBottom:12}}>Finn's read</div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,color:"#D8C8AA",lineHeight:1.7,marginBottom:20}}>{route.msg}</div>
+          {route.action?<>
+            <div className="sb" onClick={()=>pick(MODES.find(m=>m.id===route.action))} style={{background:"#A8884A",border:"none",borderRadius:8,padding:"12px 24px",textAlign:"center",cursor:"pointer"}}><span style={{fontSize:12,fontWeight:500,color:"#0F0E0C",letterSpacing:"0.03em"}}>{route.label}</span></div>
+            <div style={{textAlign:"center",marginTop:10}}><span onClick={()=>{}} style={{fontSize:11,color:"#6A6050",cursor:"pointer"}}>I need something different today</span></div>
+          </>:<div className="sb" onClick={()=>setScreen("setup")} style={{background:"#A8884A",border:"none",borderRadius:8,padding:"12px 24px",textAlign:"center",cursor:"pointer"}}><span style={{fontSize:12,fontWeight:500,color:"#0F0E0C",letterSpacing:"0.03em"}}>{route.label}</span></div>}
+        </div>})()}
 
-        {/* MOBILE SIDEBAR OVERLAY */}
-        {sideOpen&&<div style={{position:"fixed",top:0,left:0,right:0,bottom:0,zIndex:140,display:"flex"}}>
-          <div onClick={()=>setSideOpen(false)} style={{position:"absolute",top:0,left:0,right:0,bottom:0,background:"#00000060"}}/>
-          <div style={{background:"#141210",width:200,padding:"24px 14px",display:"flex",flexDirection:"column",position:"relative",zIndex:1,overflowY:"auto"}}>
-            <div style={{marginBottom:32,cursor:"pointer"}} onClick={goHome}>
-              <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:600,color:"#A8884A"}}>Forged Pen</div>
-            </div>
-            <div style={{display:"flex",flexDirection:"column",gap:1,flex:1}}>{SB_ITEMS.map(sideItem)}</div>
-          </div>
+        {/* Last Thought */}
+        {lastThought&&<div style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:8,padding:"10px 16px",marginBottom:12,display:"flex",alignItems:"flex-start",gap:10}}>
+          <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.2em",color:"#6A6050",fontWeight:500,whiteSpace:"nowrap",paddingTop:2}}>Last thought</div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#A89880",lineHeight:1.6,fontStyle:"italic"}}>"{lastThought.substring(0,150)}{lastThought.length>150?"...":""}"</div>
         </div>}
 
-        {/* CENTER */}
-        <div style={{background:"#1A1816",minHeight:"100vh",display:"flex",flexDirection:"column",overflow:"auto"}}>
-          {screen==="chat"&&mode&&<div style={{padding:"8px 28px",borderBottom:"1px solid #1E1A16",display:"flex",alignItems:"center",gap:12}}>
-            <span onClick={goHome} style={{fontFamily:"'DM Sans',sans-serif",fontSize:12,color:"#6A6050",cursor:"pointer"}}>&#8592; Back</span>
-            <span style={{fontFamily:"'DM Sans',sans-serif",fontSize:11,color:"#A8884A80"}}>{mode.label}</span>
-          </div>}
-          {centerContent()}
+        {/* Dopamine Map */}
+        {sparks.length>0&&<div style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:10,padding:"12px 16px",marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div style={{flex:1}}>
+            <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.2em",color:"#A8884A70",fontWeight:500,marginBottom:5}}>Dopamine map</div>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#8A7E6A",fontStyle:"italic"}}>"{sparks[sparks.length-1]?.text}"</div>
+          </div>
+          <div style={{fontSize:11,color:"#A8884A",marginLeft:12,animation:"wp 4s ease-in-out infinite"}}>{sparks.length} spark{sparks.length>1?"s":""}</div>
+        </div>}
+
+        {/* Card Grid Row 1 */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:8}}>
+          <div className="card" onClick={()=>project?setScreen("project"):setScreen("setup")}>
+            <svg width="16" height="16" viewBox="0 0 16 16" style={{marginBottom:8}}><rect x="3" y="1" width="10" height="13" rx="1.5" fill="none" stroke="#5A7A8A" strokeWidth="1"/><path d="M6 4h4M6 6.5h4M6 9h3" stroke="#5A7A8A" strokeWidth="0.6" opacity="0.5"/></svg>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,fontWeight:600,color:"#D8C8AA"}}>Story Bible</div>
+            <div style={{fontSize:9,color:"#6A6050",marginTop:3}}>{project?project.title:"Your story lives here"}</div>
+          </div>
+          <div className="card" onClick={()=>setScreen("torch")}>
+            <svg width="16" height="16" viewBox="0 0 16 16" style={{marginBottom:8}}><path d="M8 2L9.2 5.8L13 5.8L10 8L11 12L8 9.5L5 12L6 8L3 5.8L6.8 5.8Z" fill="none" stroke="#A8884A" strokeWidth="0.8"/></svg>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,fontWeight:600,color:"#D8C8AA"}}>Daily Spark</div>
+            <div style={{fontSize:9,color:"#6A6050",marginTop:3}}>Quote, prompt & card</div>
+          </div>
+          <div className="card" onClick={()=>pick(MODES.find(m=>m.id==="contain"))}>
+            <svg width="16" height="16" viewBox="0 0 16 16" style={{marginBottom:8}}><circle cx="8" cy="8" r="5.5" fill="none" stroke="#908050" strokeWidth="0.9"/><path d="M5 8c1.5-2.5 4.5-2.5 6 0c-1.5 2.5-4.5 2.5-6 0z" fill="#908050" opacity="0.1"/></svg>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,fontWeight:600,color:"#D8C8AA"}}>Contain</div>
+            <div style={{fontSize:9,color:"#6A6050",marginTop:3}}>Pull it all together</div>
+          </div>
         </div>
 
-        {/* RIGHT SIDEBAR */}
-        <div className="desk-only" style={{position:"sticky",top:0,height:"100vh",overflowY:"auto"}}>
-          {rightSidebar()}
+        {/* Card Grid Row 2 */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
+          <div className="card" onClick={()=>{setSubMenu("workshop");setScreen("submenu")}} style={{display:"flex",alignItems:"center",gap:10}}>
+            <svg width="16" height="16" viewBox="0 0 16 16" style={{flexShrink:0}}><path d="M4 12L8 3L12 12" fill="none" stroke="#A8884A" strokeWidth="1"/><circle cx="8" cy="9" r="1.2" fill="#A8884A" opacity="0.25"/></svg>
+            <div><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,fontWeight:600,color:"#A8884A"}}>Coaching</div><div style={{fontSize:9,color:"#6A6050"}}>Craft feedback</div></div>
+          </div>
+          <div className="card" onClick={()=>{setSubMenu("neuro");setScreen("submenu")}} style={{display:"flex",alignItems:"center",gap:10}}>
+            <svg width="16" height="16" viewBox="0 0 16 16" style={{flexShrink:0}}><circle cx="5.5" cy="5.5" r="3" fill="none" stroke="#5A7A5C" strokeWidth="0.8"/><circle cx="10.5" cy="10.5" r="3" fill="none" stroke="#5A7A5C" strokeWidth="0.8"/></svg>
+            <div><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,fontWeight:600,color:"#5A7A5C"}}>Neurodivergent</div><div style={{fontSize:9,color:"#6A6050"}}>Brain support</div></div>
+          </div>
+        </div>
+
+        {/* Card Grid Row 3 */}
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,marginBottom:20}}>
+          <div className="card" onClick={()=>pick(MODES.find(m=>m.id==="forge"))} style={{textAlign:"center",padding:"12px 8px"}}>
+            <svg width="14" height="14" viewBox="0 0 14 14" style={{margin:"0 auto 6px",display:"block"}}><path d="M7 1l1.2 3.5L7 12 5.8 4.5z" fill="none" stroke="#A8884A" strokeWidth="0.8"/><rect x="5.5" y="11.5" width="3" height="1.3" rx="0.4" fill="#A8884A" opacity="0.25"/></svg>
+            <div style={{fontSize:10,fontWeight:500,color:"#A8884A"}}>Forge</div>
+          </div>
+          <div className="card" onClick={()=>pick(MODES.find(m=>m.id==="inferno"))} style={{textAlign:"center",padding:"12px 8px",background:"linear-gradient(135deg,#1E1614,#1A1210)",borderColor:"#2A201A"}}>
+            <svg width="14" height="14" viewBox="0 0 14 14" style={{margin:"0 auto 6px",display:"block"}}><path d="M7 1.5c1.8 1.8 3.5 3.5 2.3 6.5c-.8 2-1.8 1.5-2.3 1.5s-1.5.5-2.3-1.5c-1.2-3 .5-4.7 2.3-6.5z" fill="#B06848" opacity="0.12" stroke="#B06848" strokeWidth="0.8"/></svg>
+            <div style={{fontSize:10,fontWeight:500,color:"#B06848"}}>Inferno</div>
+          </div>
+          <div className="card" onClick={()=>pick(MODES.find(m=>m.id==="simmer"))} style={{textAlign:"center",padding:"12px 8px"}}>
+            <svg width="14" height="14" viewBox="0 0 14 14" style={{margin:"0 auto 6px",display:"block"}}><ellipse cx="7" cy="9.5" rx="4" ry="2.2" fill="none" stroke="#907860" strokeWidth="0.8"/><path d="M4 9.5c0-3 1.2-4.5 3-4.5s3 1.5 3 4.5" fill="none" stroke="#907860" strokeWidth="0.8"/></svg>
+            <div style={{fontSize:10,fontWeight:500,color:"#907860"}}>Simmer</div>
+          </div>
+          <div className="card" onClick={()=>project?pick(MODES.find(m=>m.id==="rekindle")):null} style={{textAlign:"center",padding:"12px 8px",opacity:project?1:.4}}>
+            <svg width="14" height="14" viewBox="0 0 14 14" style={{margin:"0 auto 6px",display:"block"}}><path d="M7 2L8.2 5L11 5L8.8 7L9.5 10L7 8.2L4.5 10L5.2 7L3 5L5.8 5Z" fill="none" stroke="#A8884A" strokeWidth="0.7"/></svg>
+            <div style={{fontSize:10,fontWeight:500,color:"#A8884A"}}>Rekindle</div>
+          </div>
+        </div>
+
+        {/* Disclaimer */}
+        <div style={{textAlign:"center",padding:"4px 0 16px"}}>
+          <div style={{fontSize:10,color:"#6A6050",lineHeight:1.6}}>Forged Pen is a writing craft tool, not a mental health service or diagnostic tool.<br/>If you are in crisis, please reach out to a qualified professional.</div>
+        </div>
+      </div>}
+
+      {/* SUBMENU */}
+      {screen==="submenu"&&<div style={{maxWidth:600,margin:"0 auto",padding:"0 20px 20px",animation:"fu .4s ease-out"}}>
+        <div onClick={goHome} style={{fontSize:12,color:"#6A6050",cursor:"pointer",marginBottom:16}}>Back</div>
+        {subMenu==="workshop"&&<>
+          <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#A8884A90",fontWeight:500,marginBottom:8}}>Coaching</div>
+          <p style={{fontSize:13,color:"#8A7E6A",marginBottom:20,lineHeight:1.6}}>Bring your work. Finn will find what's strong, name what's off, and help you see what you missed.</p>
+          {MODES.filter(m=>m.cat==="craft"||m.cat==="intuition").map(m=><div key={m.id} className="card" onClick={()=>pick(m)} style={{marginBottom:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,fontWeight:600,color:"#D8C8AA"}}>{m.label}</div>
+            <div style={{fontSize:10,color:"#6A6050"}}>{m.sub}</div>
+          </div>)}
+        </>}
+        {subMenu==="neuro"&&<>
+          <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#5A7A5C90",fontWeight:500,marginBottom:8}}>Neurodivergent Support</div>
+          <p style={{fontSize:13,color:"#8A7E6A",marginBottom:20,lineHeight:1.6}}>For when your brain is the obstacle, not your story.</p>
+          {MODES.filter(m=>m.cat==="neuro").map(m=><div key={m.id} className="card" onClick={()=>pick(m)} style={{marginBottom:6,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,fontWeight:600,color:"#D8C8AA"}}>{m.label}</div>
+            <div style={{fontSize:10,color:"#6A6050"}}>{m.sub}</div>
+          </div>)}
+        </>}
+      </div>}
+
+      {/* STORY BIBLE SETUP */}
+      {screen==="setup"&&<div style={{maxWidth:600,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
+        <div onClick={goHome} style={{fontSize:12,color:"#6A6050",cursor:"pointer",marginBottom:16}}>Back</div>
+        <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#5A7A8A",fontWeight:500,marginBottom:8}}>Story Bible</div>
+        <p style={{fontSize:13,color:"#8A7E6A",marginBottom:16,lineHeight:1.6}}>Fill in what you can. Skip what you can't. Come back later. None of this has to be perfect.</p>
+        <div style={{display:"flex",gap:6,marginBottom:16,flexWrap:"wrap"}}><BibTab id="overview" label="Overview" active={bibTab==="overview"} onClick={setBibTab}/><BibTab id="characters" label="Characters" active={bibTab==="characters"} onClick={setBibTab}/><BibTab id="world" label="World" active={bibTab==="world"} onClick={setBibTab}/><BibTab id="chapters" label="Chapters" active={bibTab==="chapters"} onClick={setBibTab}/><BibTab id="current" label="Current Chapter" active={bibTab==="current"} onClick={setBibTab}/></div>
+        {bibTab==="overview"&&<><FormField label="Project title" k="title" ph="My Novel" value={pForm.title} onChange={updateField}/><FormField label="Genre" k="genre" ph="Contemporary fiction, fantasy, memoir..." value={pForm.genre} onChange={updateField}/><FormField label="Synopsis (the whole arc, spoilers welcome)" k="synopsis" ph="The full story..." value={pForm.synopsis} onChange={updateField} multi/><FormField label="Where are you right now?" k="where" ph="Chapter 3, the confrontation scene" value={pForm.where} onChange={updateField}/><FormField label="What are you stuck on?" k="stuck" ph="If you don't know, that counts as an answer." value={pForm.stuck} onChange={updateField}/><FormField label="What excites you most about this project?" k="excites" ph="The slow burn, the world, the voice..." value={pForm.excites} onChange={updateField} multi/></>}
+        {bibTab==="characters"&&<><FormField label="Protagonist" k="protagonist" ph="Name, age, core trait, internal conflict, arc..." value={pForm.protagonist} onChange={updateField} multi/><FormField label="Supporting Characters" k="supporting" ph="One per paragraph works best..." value={pForm.supporting} onChange={updateField} multi/><FormField label="Antagonist" k="antagonist" ph="Person, force, or system..." value={pForm.antagonist} onChange={updateField} multi/></>}
+        {bibTab==="world"&&<><WorldField label="Core Setting" helper="When and where does this story take place?" example="Northern Michigan, late summer..." k="worldSetting" value={pForm.worldSetting} onChange={updateField}/><WorldField label="World Rules" helper="What can and cannot happen here?" example="Magic exists but only in children..." k="worldRules" value={pForm.worldRules} onChange={updateField}/><WorldField label="Beliefs vs. Reality" helper="What do characters assume that isn't true?" example="The town believes the fires are natural..." k="worldBeliefs" value={pForm.worldBeliefs} onChange={updateField}/><WorldField label="What Makes This World Dangerous" helper="What creates real stakes?" example="If Emma uses too much magic..." k="worldDanger" value={pForm.worldDanger} onChange={updateField}/><WorldField label="Tone" helper="What does this world feel like?" example="Warm but uneasy..." k="worldTone" value={pForm.worldTone} onChange={updateField}/></>}
+        {bibTab==="chapters"&&<><p style={{fontSize:12,color:"#8A7E6A",marginBottom:14,lineHeight:1.5}}>One field per chapter. Keep summaries short.</p>{pForm.chapters.map((ch,idx)=><div key={idx} style={{marginBottom:14}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:5}}><label style={{fontSize:13,color:"#A8884A",fontWeight:600}}>Chapter {ch.num}</label>{pForm.chapters.length>1&&<span onClick={()=>removeChapter(idx)} style={{fontSize:11,color:"#6A6050",cursor:"pointer"}}>Remove</span>}</div><textarea className="fi" rows={2} placeholder={`What happens in chapter ${ch.num}...`} value={ch.summary} onChange={e=>updateChapter(idx,e.target.value)} style={{resize:"vertical",fontSize:13}}/></div>)}<Btn onClick={addChapter} s={{width:"100%",background:"none",borderStyle:"dashed",borderColor:"#2A2420",color:"#8A7E6A",marginBottom:8}}>+ Add Chapter</Btn></>}
+        {bibTab==="current"&&<><p style={{fontSize:12,color:"#8A7E6A",marginBottom:8,lineHeight:1.5}}>Paste the chapter you're currently working on. Finn will reference this text directly.</p><FormField label="Current chapter text" k="currentChapter" ph="Paste your current chapter here..." value={pForm.currentChapter} onChange={updateField} multi/></>}
+        <Btn onClick={handleSetup} s={{width:"100%",background:"#A8884A20",borderColor:"#A8884A40",fontWeight:600,marginTop:8}}>{project?"Update":"Save"} Story Bible</Btn>
+      </div>}
+
+      {/* STORY BIBLE VIEW */}
+      {screen==="project"&&project&&<div style={{maxWidth:600,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
+        <div onClick={goHome} style={{fontSize:12,color:"#6A6050",cursor:"pointer",marginBottom:16}}>Back</div>
+        <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#5A7A8A",fontWeight:500,marginBottom:12}}>Story Bible</div>
+        <div style={{display:"flex",gap:10,marginBottom:16}}>
+          <Btn onClick={()=>{const pf={...project};if(!Array.isArray(pf.chapters))pf.chapters=pf.chapters?[{num:1,summary:pf.chapters}]:[{num:1,summary:""}];setPForm(pf);setScreen("setup")}} s={{flex:1}}>Edit</Btn>
+          <Btn onClick={()=>pick(MODES.find(m=>m.id==="rekindle"))} s={{flex:1,background:"#A8884A15"}}>Rekindle</Btn>
+        </div>
+        {sparks.length>0&&<div style={{marginBottom:16}}><div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.15em",color:"#A8884A70",fontWeight:500,marginBottom:10}}>Dopamine Map ({sparks.length})</div>{sparks.map((s,i)=><div key={i} style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:8,padding:"10px 14px",marginBottom:6}}><p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:12,color:"#C8B8A0",lineHeight:1.5}}>"{s.text}"</p><p style={{fontSize:9,color:"#4A4238",marginTop:4}}>{s.date}</p></div>)}</div>}
+        <div style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:10,padding:20}}>
+          <h3 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,color:"#D8C8AA",marginBottom:14}}>{project.title||"Untitled"}</h3>
+          {[["Genre",project.genre],["Synopsis",project.synopsis],["Protagonist",project.protagonist],["Supporting",project.supporting],["Antagonist",project.antagonist],["Setting",project.worldSetting],["Rules",project.worldRules],["Beliefs vs Reality",project.worldBeliefs],["Danger",project.worldDanger],["Tone",project.worldTone],["Position",project.where],["Stuck on",project.stuck],["Excites you",project.excites]].map(([l,v])=>v?<div key={l} style={{marginBottom:10}}><p style={{fontSize:9,textTransform:"uppercase",letterSpacing:"0.12em",color:"#6A6050",fontWeight:500,marginBottom:3}}>{l}</p><p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#C8B8A0",lineHeight:1.6}}>{v}</p></div>:null)}
+          {project.chapters&&Array.isArray(project.chapters)&&project.chapters.some(c=>c.summary)&&<div style={{marginBottom:10}}><p style={{fontSize:9,textTransform:"uppercase",letterSpacing:"0.12em",color:"#6A6050",fontWeight:500,marginBottom:6}}>Chapters</p>{project.chapters.filter(c=>c.summary).map((c,i)=><p key={i} style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#C8B8A0",lineHeight:1.6,marginBottom:4}}><span style={{color:"#A8884A",fontWeight:600}}>Ch{c.num}:</span> {c.summary}</p>)}</div>}
+        </div>
+      </div>}
+
+      {/* DAILY SPARK */}
+      {screen==="torch"&&<div style={{maxWidth:600,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
+        <div onClick={goHome} style={{fontSize:12,color:"#6A6050",cursor:"pointer",marginBottom:16}}>Back</div>
+        <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#A8884A70",fontWeight:500,marginBottom:16}}>Daily Spark</div>
+        <div style={{marginBottom:24,textAlign:"center"}}>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontWeight:500,color:"#A8884A90",lineHeight:1.7}}>"{tk.q}"</div>
+          <div style={{fontSize:10,color:"#6A6050",marginTop:8}}>{tk.a}</div>
+        </div>
+        <div style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:10,padding:"14px 18px",marginBottom:16}}>
+          <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.15em",color:"#A8884A70",fontWeight:500,marginBottom:6}}>Today's Prompt</div>
+          <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:15,color:"#C8B8A0",lineHeight:1.7,fontStyle:"italic"}}>{tk.p}</p>
+        </div>
+        <div className="cp" onClick={()=>setFlipped(!flipped)} style={{background:flipped?"#1A1816":"linear-gradient(135deg,#201A28,#1A1620)",border:"1px solid "+(flipped?"#221E1A":"#302840"),borderRadius:10,padding:18,textAlign:"center",cursor:"pointer"}}>
+          {!flipped?<div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,color:"#9A8AB0",fontWeight:600}}>Pull Today's Card</div>
+          :<div style={{textAlign:"left",animation:"fi .6s ease-out"}}>
+            <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.15em",color:"#7A6EA0",fontWeight:500,marginBottom:6}}>Today's Card</div>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:19,color:"#D8C8AA",fontWeight:600,marginBottom:8}}>{tk.cn}</div>
+            <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#8A7E6A",lineHeight:1.7,marginBottom:12}}>{tk.cl}</p>
+            <div style={{background:"#121010",borderRadius:8,padding:"10px 12px"}}>
+              <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.12em",color:"#A8884A70",fontWeight:500,marginBottom:4}}>Micro-Challenge</div>
+              <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#C8B8A0",lineHeight:1.6}}>{tk.cx}</p>
+            </div>
+          </div>}
+        </div>
+      </div>}
+
+      {/* CHAT */}
+      {screen==="chat"&&mode&&<div style={{maxWidth:isFocusMode?500:700,margin:"0 auto",display:"flex",flexDirection:"column",height:"calc(100vh - 60px)"}}>
+        {isFocusMode&&<div style={{textAlign:"center",padding:"8px 0",fontSize:10,color:"#5A7A5C80",letterSpacing:"0.1em"}}>FOCUS MODE</div>}
+        {!isFocusMode&&<div style={{padding:"4px 20px 8px",fontSize:11,color:"#A8884A60"}}>{mode.label}</div>}
+        <div style={{flex:1,overflow:"auto",padding:"8px 20px",display:"flex",flexDirection:"column",gap:14}}>
+          {msgs.map((m,i)=><div key={i} className={m.role==="assistant"?"ma":"mu"} style={{display:"flex",width:"100%",justifyContent:m.role==="user"?"flex-end":"flex-start"}}>
+            <div style={{maxWidth:"88%",borderRadius:14,padding:"14px 18px",lineHeight:1.65,...(m.role==="user"?{background:"#1E1A16",border:"1px solid #2A2420",borderTopRightRadius:4}:{background:"#1A1816",border:"1px solid #221E1A",borderTopLeftRadius:4})}}>
+              {m.role==="assistant"&&<div style={{fontSize:10,fontWeight:500,color:CATS[mode.cat]?.c||"#A8884A",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:8}}>Finn</div>}
+              <div style={{fontFamily:"'Cormorant Garamond',serif",color:"#C8B8A0",fontSize:15,lineHeight:1.7}}>{m.content.split("\n").map((l,j)=><p key={j} style={{marginBottom:l?10:4,minHeight:l?undefined:4}}>{l}</p>)}</div>
+              {m.role==="assistant"&&i>0&&<>{flaggedIdx===i?<span style={{fontSize:11,color:"#A8884A",fontStyle:"italic",marginTop:8,display:"block"}}>{sparkMsgs[Math.floor(Math.random()*sparkMsgs.length)]}</span>:<button onClick={()=>flagSpark(m.content,i)} style={{background:"none",border:"1px solid #221E1A",borderRadius:6,color:"#6A6050",fontSize:10,padding:"4px 10px",marginTop:8,cursor:"pointer",fontFamily:"'DM Sans',sans-serif"}}>This excites me</button>}</>}
+            </div>
+          </div>)}
+          {loading&&<div className="ma" style={{display:"flex",width:"100%",alignItems:"flex-start",gap:8}}>
+            <div style={{maxWidth:"88%",borderRadius:14,padding:"14px 18px",background:"#1A1816",border:"1px solid #221E1A",borderTopLeftRadius:4,flex:1}}>
+              <div style={{fontSize:10,fontWeight:500,color:CATS[mode.cat]?.c||"#A8884A",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:8}}>Finn</div>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={{fontSize:13,color:"#6A6050",fontStyle:"italic"}}>{loadMsg}</span>
+                <span style={{display:"flex",gap:4}}>{[0,.3,.6].map(d=><span key={d} style={{color:"#A8884A",fontSize:8,animation:"pu 1.2s ease-in-out infinite",animationDelay:`${d}s`}}>&#9679;</span>)}</span>
+              </div>
+            </div>
+            <button onClick={cancelReq} style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:6,color:"#6A6050",fontSize:10,padding:"6px 10px",cursor:"pointer",flexShrink:0,fontFamily:"'DM Sans',sans-serif"}}>Stop</button>
+          </div>}
+          <div ref={endRef}/>
+        </div>
+        <div style={{padding:"12px 20px 20px",borderTop:"1px solid #1E1A16",background:"#121010"}}>
+          <div style={{display:"flex",gap:10,alignItems:"flex-end",background:"#1A1816",border:"1px solid #221E1A",borderRadius:14,padding:"10px 14px"}}>
+            <textarea ref={taRef} value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send()}}} placeholder={mode.ph} style={{flex:1,background:"none",border:"none",outline:"none",color:"#D8C8AA",fontFamily:"'Cormorant Garamond',serif",fontSize:15,lineHeight:1.6,resize:"none",maxHeight:200}} rows={1}/>
+            <button className="sb" onClick={send} disabled={!input.trim()||loading} style={{width:34,height:34,borderRadius:8,border:"none",background:"#A8884A",color:"#0F0E0C",fontSize:16,fontWeight:700,cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",opacity:!input.trim()||loading?.3:1}}>{"\u2191"}</button>
+          </div>
+          <div style={{display:"flex",justifyContent:"space-between",marginTop:6}}><p style={{fontSize:9,color:"#3A3430"}}>Shift+Enter for new line</p><p onClick={newChat} style={{fontSize:9,color:"#5A7A8A",cursor:"pointer"}}>New chat</p></div>
         </div>
       </div>}
     </div>
