@@ -6,6 +6,8 @@ RULES: Never write prose for the writer. ONE illustrative sentence max to demo a
 
 CONCISENESS: Say more in fewer words. Your responses should feel like a coach talking, not an essay. Front-load the insight or action. Cut setup and preamble. If you can say it in 2 sentences, don't use 4. Short paragraphs. No walls of text. The writer's ADHD brain loses the thread in long responses. Be warm but efficient.
 
+RESPONSE DEPTH: Default to concise, precise responses. Deliver the right insight plus one clear next move, not a data dump. BUT when the writer asks for more depth, says "break this down," "go deeper," "give me more," "pull everything," or "be thorough," shift to comprehensive mode: provide structured detail, pull specific evidence from the Story Bible, name characters and scenes, and organize your response with clear sections. The writer controls the depth. Match their request exactly. If they want a comprehensive breakdown, give them one. If they want a quick answer, keep it tight.
+
 MOTIVATION FRAMEWORK (Self-Determination Theory): Support the writer's three basic psychological needs:
 - AUTONOMY: Always offer choices, never command. "Here are two paths. Which feels right?" not "Do this next." The writer owns every decision.
 - COMPETENCE: Name specific craft growth you observe. Celebrate completed scenes as finished things.
@@ -16,7 +18,9 @@ EXECUTION AWARENESS: If the writer has a detailed Story Bible and keeps brainsto
 
 COHERENCE CHECKING: Check for character inconsistencies, tone drift, and plot contradictions against the Story Bible. Frame as questions, not corrections.
 
-STORY BIBLE AWARENESS: You have full access to the writer's project details. USE THIS PROACTIVELY. Reference their characters by name. Never give generic advice when you have their specific story. You are Finn. You know this story.
+STORY BIBLE AWARENESS: You have full access to the writer's project details. USE THIS PROACTIVELY. In your VERY FIRST response in any conversation, reference something specific from the Story Bible: a character by name, a plot point, a world detail, a scene they're stuck on. Prove you know this story immediately. Never give generic advice when you have their specific story. You are Finn. You know this story.
+
+AGE AND CONTEXT AWARENESS: If a character is a child or teenager, all suggestions, scenarios, and examples must be appropriate to that character's age, maturity, world, and circumstances. A 12-year-old protagonist should face 12-year-old problems in ways a 12-year-old would. Always check character ages and context in the Story Bible before making suggestions.
 
 EXECUTIVE DYSFUNCTION DETECTION: Watch for circling, freezing, scattered responses, repeated "I don't know." When detected: "This sounds less like a story problem and more like your brain won't let you start. Want one micro-step instead?" Offer Micro-Mode or The Forge.`;
 
@@ -277,6 +281,8 @@ export default function App() {
       setMsgs(saved);
     } else if(m.id==="rekindle"&&project){
       setMsgs([{role:"assistant",content:`Welcome back. You've been working on "${project.title}." ${project.where?`Last time: ${project.where}.`:""} ${project.stuck?`You were stuck on: ${project.stuck}.`:""}\n\nLet me ask you something small to get your brain back in the story.`}]);
+    } else if(m.id==="diagnose"&&project&&project.stuck&&project.stuck.trim()){
+      setMsgs([{role:"assistant",content:`I know where you're stuck. ${project.stuck}\n\nLet me ask you something about that. What's the one thing about this moment that you can see clearly, even if everything else is foggy?`}]);
     } else { setMsgs([{role:"assistant",content:INTROS[m.id]}]); }
     setInput("");
   };
@@ -286,6 +292,8 @@ export default function App() {
     saveStored("tt-chat-"+mode.id,null);
     if(mode.id==="rekindle"&&project){
       setMsgs([{role:"assistant",content:`Welcome back. You've been working on "${project.title}." ${project.where?`Last time: ${project.where}.`:""} ${project.stuck?`You were stuck on: ${project.stuck}.`:""}\n\nLet me ask you something small to get your brain back in the story.`}]);
+    } else if(mode.id==="diagnose"&&project&&project.stuck&&project.stuck.trim()){
+      setMsgs([{role:"assistant",content:`I know where you're stuck. ${project.stuck}\n\nLet me ask you something about that. What's the one thing about this moment that you can see clearly, even if everything else is foggy?`}]);
     } else { setMsgs([{role:"assistant",content:INTROS[mode.id]}]); }
   };
 
@@ -418,37 +426,37 @@ export default function App() {
         </div>
 
         {/* Finn's Read */}
-        {(()=>{const route=getSmartRoute();return <div style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:12,padding:24,marginBottom:12,position:"relative"}}>
-          <div style={{position:"absolute",top:0,left:24,right:24,height:1,background:"linear-gradient(90deg,transparent,#A8884A20,transparent)"}}/>
-          {project&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-            <div style={{fontSize:9,color:"#6A6050",letterSpacing:"0.1em"}}>{project.title?.toUpperCase()}</div>
-            {project.where&&<div style={{fontSize:9,color:"#4A4238"}}>{project.where}</div>}
+        {(()=>{const route=getSmartRoute();return <div style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:10,padding:"18px 20px",marginBottom:12,position:"relative"}}>
+          <div style={{position:"absolute",top:0,left:20,right:20,height:1,background:"linear-gradient(90deg,transparent,#A8884A20,transparent)"}}/>
+          {project&&<div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+            <div style={{fontSize:12,color:"#8A7E6A",letterSpacing:"0.08em",fontWeight:500}}>{project.title?.toUpperCase()}</div>
+            {project.where&&<div style={{fontSize:11,color:"#6A6050"}}>{project.where}</div>}
           </div>}
-          <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#A8884A80",fontWeight:500,marginBottom:12}}>Finn's read</div>
-          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,color:"#D8C8AA",lineHeight:1.7,marginBottom:20}}>{route.msg}</div>
+          <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.25em",color:"#A8884A80",fontWeight:500,marginBottom:10}}>Finn's read</div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:17,color:"#D8C8AA",lineHeight:1.7,marginBottom:18}}>{route.msg}</div>
           {route.action?<>
-            <div className="sb" onClick={()=>pick(MODES.find(m=>m.id===route.action))} style={{background:"#A8884A",border:"none",borderRadius:8,padding:"12px 24px",textAlign:"center",cursor:"pointer"}}><span style={{fontSize:12,fontWeight:500,color:"#0F0E0C",letterSpacing:"0.03em"}}>{route.label}</span></div>
-            <div style={{textAlign:"center",marginTop:10}}><span onClick={()=>{}} style={{fontSize:11,color:"#6A6050",cursor:"pointer"}}>I need something different today</span></div>
-          </>:<div className="sb" onClick={()=>setScreen("setup")} style={{background:"#A8884A",border:"none",borderRadius:8,padding:"12px 24px",textAlign:"center",cursor:"pointer"}}><span style={{fontSize:12,fontWeight:500,color:"#0F0E0C",letterSpacing:"0.03em"}}>{route.label}</span></div>}
+            <div className="sb" onClick={()=>pick(MODES.find(m=>m.id===route.action))} style={{background:"#A8884A",border:"none",borderRadius:8,padding:"11px 24px",textAlign:"center",cursor:"pointer"}}><span style={{fontSize:12,fontWeight:500,color:"#0F0E0C",letterSpacing:"0.03em"}}>{route.label}</span></div>
+            <div style={{textAlign:"center",marginTop:10}}><span onClick={()=>{const el=document.getElementById("fp-grid");if(el)el.scrollIntoView({behavior:"smooth"})}} style={{fontSize:11,color:"#6A6050",cursor:"pointer"}}>I need something different today</span></div>
+          </>:<div className="sb" onClick={()=>setScreen("setup")} style={{background:"#A8884A",border:"none",borderRadius:8,padding:"11px 24px",textAlign:"center",cursor:"pointer"}}><span style={{fontSize:12,fontWeight:500,color:"#0F0E0C",letterSpacing:"0.03em"}}>{route.label}</span></div>}
         </div>})()}
 
         {/* Last Thought */}
         {lastThought&&<div style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:8,padding:"10px 16px",marginBottom:12,display:"flex",alignItems:"flex-start",gap:10}}>
-          <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.2em",color:"#6A6050",fontWeight:500,whiteSpace:"nowrap",paddingTop:2}}>Last thought</div>
-          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#A89880",lineHeight:1.6,fontStyle:"italic"}}>"{lastThought.substring(0,150)}{lastThought.length>150?"...":""}"</div>
+          <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:"0.18em",color:"#6A6050",fontWeight:500,whiteSpace:"nowrap",paddingTop:2}}>Last thought</div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,color:"#A89880",lineHeight:1.6,fontStyle:"italic"}}>"{lastThought.substring(0,150)}{lastThought.length>150?"...":""}"</div>
         </div>}
 
         {/* Dopamine Map */}
         {sparks.length>0&&<div style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:10,padding:"12px 16px",marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div style={{flex:1}}>
-            <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.2em",color:"#A8884A70",fontWeight:500,marginBottom:5}}>Dopamine map</div>
-            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#8A7E6A",fontStyle:"italic"}}>"{sparks[sparks.length-1]?.text}"</div>
+            <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:"0.18em",color:"#A8884A70",fontWeight:500,marginBottom:5}}>Dopamine map</div>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,color:"#8A7E6A",fontStyle:"italic"}}>"{sparks[sparks.length-1]?.text}"</div>
           </div>
           <div style={{fontSize:11,color:"#A8884A",marginLeft:12,animation:"wp 4s ease-in-out infinite"}}>{sparks.length} spark{sparks.length>1?"s":""}</div>
         </div>}
 
         {/* Card Grid Row 1 */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:8}}>
+        <div id="fp-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:8}}>
           <div className="card" onClick={()=>project?setScreen("project"):setScreen("setup")}>
             <svg width="16" height="16" viewBox="0 0 16 16" style={{marginBottom:8}}><rect x="3" y="1" width="10" height="13" rx="1.5" fill="none" stroke="#5A7A8A" strokeWidth="1"/><path d="M6 4h4M6 6.5h4M6 9h3" stroke="#5A7A8A" strokeWidth="0.6" opacity="0.5"/></svg>
             <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,fontWeight:600,color:"#D8C8AA"}}>Story Bible</div>
