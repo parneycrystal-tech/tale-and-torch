@@ -292,9 +292,15 @@ export default function App() {
 
   const initScenes=()=>{
     const existing=loadStored("tt-scenes");
-    if(existing&&existing.length>0){setScenes(existing);setActiveScene(existing[existing.length-1].id);setScreen("container");return}
+    if(existing&&existing.length>0){
+      setScenes(existing);
+      const savedActive=loadStored("tt-activescene");
+      const found=savedActive&&existing.find(s=>s.id===savedActive);
+      setActiveScene(found?savedActive:existing[existing.length-1].id);
+      setScreen("container");return;
+    }
     const first={id:"s_1",chapter:1,scene:1,title:"",text:"",status:"drafting",lastEdited:Date.now()};
-    saveScenes([first]);setActiveScene(first.id);setScreen("container");
+    saveScenes([first]);setActiveScene(first.id);saveStored("tt-activescene",first.id);setScreen("container");
   };
 
   const addScene=(chapterNum)=>{
@@ -325,7 +331,9 @@ export default function App() {
   const updateSceneText=(id,text)=>{
     const updated=scenes.map(s=>s.id===id?{...s,text,lastEdited:Date.now()}:s);
     setScenes(updated);
-    setLastThought(text.trim().split(/[.!?]+/).filter(s=>s.trim()).pop()?.trim()||null);
+    saveStored("tt-activescene",id);
+    const lastSentence=text.trim().split(/[.!?]+/).filter(s=>s.trim()).pop()?.trim()||null;
+    if(lastSentence)setLastThought(lastSentence);
   };
 
   // Auto-save every 3 seconds when writing
@@ -701,7 +709,7 @@ export default function App() {
               <div onClick={goHome} style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,fontWeight:600,color:"#A8884A",cursor:"pointer"}}>Forged Pen</div>
               <div style={{fontSize:8,color:"#6A6050",marginTop:3}}>THE FORGE</div>
             </div>
-            <div onClick={()=>{if(scenes.length>0){const last=scenes.reduce((a,b)=>b.lastEdited>a.lastEdited?b:a);setActiveScene(last.id)}}} style={{background:"#A8884A",borderRadius:8,padding:"9px 14px",textAlign:"center",cursor:"pointer",marginBottom:14}}>
+            <div onClick={()=>{if(scenes.length>0){const savedActive=loadStored("tt-activescene");const found=savedActive&&scenes.find(s=>s.id===savedActive);setActiveScene(found?savedActive:scenes.reduce((a,b)=>b.lastEdited>a.lastEdited?b:a).id)}}} style={{background:"#A8884A",borderRadius:8,padding:"9px 14px",textAlign:"center",cursor:"pointer",marginBottom:14}}>
               <span style={{fontSize:11,fontWeight:500,color:"#0F0E0C"}}>Continue writing</span>
             </div>
             <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:"0.18em",color:"#6A6050",fontWeight:500,marginBottom:8}}>Chapters</div>
@@ -710,7 +718,7 @@ export default function App() {
                 const chScenes=scenes.filter(s=>s.chapter===ch).sort((a,b)=>a.scene-b.scene);
                 return <div key={ch} style={{marginBottom:10}}>
                   <div style={{fontSize:11,color:"#8A7E6A",fontWeight:500,padding:"4px 0",marginBottom:2}}>Chapter {ch}</div>
-                  {chScenes.map(s=><div key={s.id} onClick={()=>setActiveScene(s.id)} style={{padding:"6px 12px 6px 18px",borderRadius:5,cursor:"pointer",fontSize:11,color:s.id===activeScene?"#D8C8AA":"#6A6050",background:s.id===activeScene?"#A8884A0A":"transparent",borderLeft:s.id===activeScene?"2px solid #A8884A60":"2px solid transparent",transition:"all .2s"}}>{s.title||`Scene ${s.scene}`}<span style={{fontSize:9,color:"#4A4238",marginLeft:6}}>{getWordCount(s.text)}</span></div>)}
+                  {chScenes.map(s=><div key={s.id} onClick={()=>{setActiveScene(s.id);saveStored("tt-activescene",s.id)}} style={{padding:"6px 12px 6px 18px",borderRadius:5,cursor:"pointer",fontSize:11,color:s.id===activeScene?"#D8C8AA":"#6A6050",background:s.id===activeScene?"#A8884A0A":"transparent",borderLeft:s.id===activeScene?"2px solid #A8884A60":"2px solid transparent",transition:"all .2s"}}>{s.title||`Scene ${s.scene}`}<span style={{fontSize:9,color:"#4A4238",marginLeft:6}}>{getWordCount(s.text)}</span></div>)}
                   <div onClick={()=>addScene(ch)} style={{padding:"4px 12px 4px 18px",fontSize:10,color:"#4A4238",cursor:"pointer",fontStyle:"italic"}}>+ scene</div>
                 </div>;
               })}
@@ -744,7 +752,7 @@ export default function App() {
                 <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#8A7E6A",lineHeight:1.6,maxWidth:640}}>{currentScene.notes}</div>
               </div>}
               <div style={{flex:1,overflow:"auto",padding:"24px 40px"}}>
-                <textarea ref={writeRef} value={currentScene.text||""} onChange={e=>updateSceneText(currentScene.id,e.target.value)} placeholder="Start writing..." style={{width:"100%",height:"100%",minHeight:400,background:"none",border:"none",outline:"none",resize:"none",fontFamily:"'Cormorant Garamond',serif",fontSize:18,color:"#C8B8A0",lineHeight:2,letterSpacing:"0.01em",maxWidth:640}}/>
+                <textarea ref={writeRef} value={currentScene.text||""} onChange={e=>updateSceneText(currentScene.id,e.target.value)} placeholder="Start writing..." style={{width:"100%",height:"100%",minHeight:400,background:"none",border:"none",outline:"none",resize:"none",fontFamily:"'Cormorant Garamond',serif",fontSize:18,color:"#C8B8A0",lineHeight:2,letterSpacing:"0.01em"}}/>
               </div>
               <div style={{padding:"10px 40px 14px",borderTop:"1px solid #1E1A16",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <div style={{fontSize:10,color:"#6A6050"}}>Auto-saved</div>
