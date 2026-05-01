@@ -314,7 +314,11 @@ export default function App() {
     if(!project||!project.chapters)return;
     const chaptersWithContent=Array.isArray(project.chapters)?project.chapters.filter(c=>c.summary):[];
     if(chaptersWithContent.length===0)return;
-    const newScenes=chaptersWithContent.map(c=>({id:"s_imp_"+c.num+"_"+Date.now(),chapter:c.num,scene:1,title:c.summary.substring(0,50),text:"",status:"drafting",lastEdited:Date.now()}));
+    const newScenes=chaptersWithContent.map(c=>{
+      const lines=c.summary.split("\n").filter(l=>l.trim());
+      const title=lines[0]?.substring(0,50)||"Chapter "+c.num;
+      return {id:"s_imp_"+c.num+"_"+Date.now(),chapter:c.num,scene:1,title,notes:"",text:c.summary,status:"drafting",lastEdited:Date.now()};
+    });
     saveScenes(newScenes);setScenes(newScenes);
   };
 
@@ -438,7 +442,7 @@ export default function App() {
     // Scaffold chapters into The Forge if no scenes exist yet
     const existingScenes=loadStored("tt-scenes");
     if((!existingScenes||existingScenes.length===0)&&pForm.chapters&&pForm.chapters.some(c=>c.summary)){
-      const newScenes=pForm.chapters.filter(c=>c.summary).map((c,i)=>({id:"s_ch"+c.num,chapter:c.num,scene:1,title:c.summary.substring(0,50),text:"",status:"drafting",lastEdited:Date.now()}));
+      const newScenes=pForm.chapters.filter(c=>c.summary).map((c,i)=>({id:"s_ch"+c.num,chapter:c.num,scene:1,title:c.summary.substring(0,50),notes:c.summary,text:"",status:"drafting",lastEdited:Date.now()}));
       if(newScenes.length>0){saveScenes(newScenes);setScenes(newScenes)}
     }
     setScreen("home");
@@ -476,14 +480,15 @@ export default function App() {
             {(()=>{
               const away = getTimeAway();
               const isLongAway = away && (away.includes("day") || (away.includes("hour") && parseInt(away)>=12));
+              const nib = <svg width="10" height="14" viewBox="0 0 10 14" style={{verticalAlign:"middle",marginRight:6,opacity:0.5}}><path d="M5 0L6.2 5L5 12L3.8 5Z" fill="#A8884A"/><circle cx="5" cy="4.5" r="0.8" fill="#A8884A"/></svg>;
               return <>
-                <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,color:"#C8B8A0",lineHeight:1.8,marginBottom:8,marginTop:16}}>
+                <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,color:"#C8B8A0",lineHeight:1.8,marginBottom:12,marginTop:16}}>
                   "{project.title}" is right where you left it.{away ? ` It's been ${away}.` : ""}
                 </p>
-                {project.where&&<p style={{fontSize:13,color:"#8A7E6A",lineHeight:1.7,marginBottom:6}}>{project.where}</p>}
-                {project.stuck&&project.stuck.trim()&&<p style={{fontSize:13,color:"#8A7E6A",lineHeight:1.7,marginBottom:6}}>Stuck on: {project.stuck}</p>}
-                {sparks.length>0&&<p style={{fontSize:12,color:"#A8884A80",marginBottom:6}}>{sparks.length} spark{sparks.length>1?"s":""} saved</p>}
-                <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:15,color:"#C8B8A0",lineHeight:1.8,marginTop:16,marginBottom:24}}>{isLongAway?"No guilt. The project waited. So did I.":"Let's get to work."}</p>
+                {project.where&&<p style={{fontSize:13,color:"#8A7E6A",lineHeight:1.7,marginBottom:10,textAlign:"left"}}>{nib}{project.where}</p>}
+                {project.stuck&&project.stuck.trim()&&<p style={{fontSize:13,color:"#8A7E6A",lineHeight:1.7,marginBottom:10,textAlign:"left"}}>{nib}<span style={{color:"#A8884A80",fontSize:10,textTransform:"uppercase",letterSpacing:"0.1em"}}>Stuck on: </span>{project.stuck}</p>}
+                {sparks.length>0&&<p style={{fontSize:12,color:"#A8884A80",marginBottom:10,textAlign:"left"}}>{nib}{sparks.length} spark{sparks.length>1?"s":""} saved</p>}
+                <p style={{fontFamily:"'Cormorant Garamond',serif",fontSize:15,color:"#C8B8A0",lineHeight:1.8,marginTop:20,marginBottom:24}}>{isLongAway?"No guilt. The project waited. So did I.":"Let's get to work."}</p>
               </>;
             })()}
           </>:<>
@@ -553,7 +558,7 @@ export default function App() {
           </div>
           <span style={{color:"#6A6050",fontSize:14}}>&#8594;</span>
         </div>
-        {project&&project.chapters&&Array.isArray(project.chapters)&&project.chapters.some(c=>c.summary)&&(scenes.length===0||getTotalWords()===0)&&<div onClick={(e)=>{e.stopPropagation();importChaptersToForge()}} style={{textAlign:"center",padding:"6px 0 12px"}}><span style={{fontSize:11,color:"#A8884A80",cursor:"pointer"}}>Import {project.chapters.filter(c=>c.summary).length} chapters from Story Bible into The Forge</span></div>}
+        {project&&project.chapters&&Array.isArray(project.chapters)&&project.chapters.some(c=>c.summary)&&getTotalWords()<100&&<div onClick={(e)=>{e.stopPropagation();importChaptersToForge()}} style={{textAlign:"center",padding:"6px 0 12px"}}><span style={{fontSize:11,color:"#A8884A80",cursor:"pointer"}}>Import {project.chapters.filter(c=>c.summary).length} chapters from Story Bible into The Forge</span></div>}
 
         {/* Card Grid Row 1 */}
         <div id="fp-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:8}}>
@@ -734,14 +739,18 @@ export default function App() {
                 <span style={{fontSize:9,color:"#6A6050",letterSpacing:"0.12em",textTransform:"uppercase"}}>LAST THOUGHT </span>
                 <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:12,color:"#8A7E6A",fontStyle:"italic",marginLeft:6}}>"{(typeof lastThought==="string"?lastThought:"").substring(0,100)}"</span>
               </div>}
+              {currentScene.notes&&<div style={{padding:"10px 40px",background:"#1A181630",borderBottom:"1px solid #1E1A1630"}}>
+                <div style={{fontSize:9,color:"#A8884A70",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}>CHAPTER REFERENCE</div>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:13,color:"#8A7E6A",lineHeight:1.6,maxWidth:640}}>{currentScene.notes}</div>
+              </div>}
               <div style={{flex:1,overflow:"auto",padding:"24px 40px"}}>
                 <textarea ref={writeRef} value={currentScene.text||""} onChange={e=>updateSceneText(currentScene.id,e.target.value)} placeholder="Start writing..." style={{width:"100%",height:"100%",minHeight:400,background:"none",border:"none",outline:"none",resize:"none",fontFamily:"'Cormorant Garamond',serif",fontSize:18,color:"#C8B8A0",lineHeight:2,letterSpacing:"0.01em",maxWidth:640}}/>
               </div>
-              <div style={{padding:"8px 40px 12px",borderTop:"1px solid #1E1A16",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                <div style={{fontSize:10,color:"#4A4238"}}>Auto-saved</div>
+              <div style={{padding:"10px 40px 14px",borderTop:"1px solid #1E1A16",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <div style={{fontSize:10,color:"#6A6050"}}>Auto-saved</div>
                 <div style={{display:"flex",gap:10}}>
-                  <span onClick={()=>{setFinnOpen(!finnOpen);if(!finnOpen&&containerMsgs.length===0){setContainerMsgs([{role:"assistant",content:`I'm reading Chapter ${currentScene.chapter}, Scene ${currentScene.scene}. ${getWordCount(currentScene.text)>0?"I can see what you're writing. Ask me anything about this scene, or tell me what you need.":"Empty page. Tell me what this scene needs to accomplish and I'll help you find the first line."}`}])}}} style={{fontSize:10,color:finnOpen?"#A8884A":"#6A6050",background:"#1A1816",border:"1px solid #221E1A",borderRadius:6,padding:"5px 12px",cursor:"pointer"}}>{finnOpen?"Close Finn":"Ask Finn"}</span>
-                  <span onClick={goHome} style={{fontSize:10,color:"#4A4238",cursor:"pointer",padding:"5px 0"}}>Home</span>
+                  <span onClick={()=>{setFinnOpen(!finnOpen);if(!finnOpen&&containerMsgs.length===0){setContainerMsgs([{role:"assistant",content:`I'm reading Chapter ${currentScene.chapter}, Scene ${currentScene.scene}. ${getWordCount(currentScene.text)>0?"I can see what you're writing. Ask me anything about this scene, or tell me what you need.":"Empty page. Tell me what this scene needs to accomplish and I'll help you find the first line."}`}])}}} style={{fontSize:12,color:finnOpen?"#A8884A":"#A8884A90",background:"#1E1A16",border:"1px solid #2A2420",borderRadius:8,padding:"7px 16px",cursor:"pointer",fontWeight:500}}>{finnOpen?"Close Finn":"Ask Finn"}</span>
+                  <span onClick={goHome} style={{fontSize:12,color:"#8A7E6A",cursor:"pointer",padding:"7px 12px",background:"#1E1A16",border:"1px solid #2A2420",borderRadius:8}}>Home</span>
                 </div>
               </div>
             </>:<div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center"}}><p style={{color:"#6A6050"}}>Select a scene or create one.</p></div>}
