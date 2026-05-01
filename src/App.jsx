@@ -414,7 +414,7 @@ export default function App() {
   };
   const cancelReq=()=>{if(abortRef.current){abortRef.current.abort();abortRef.current=null;setLoading(false)}};
   const sparkMsgs=["Saved. Future you will thank you for this.","Flagged. This is a breadcrumb back to the fire.","Noted. This one has heat.","Saved. When the smoke comes, this is your proof."];
-  const flagSpark=(c,idx)=>{const ns=[...sparks,{text:c.substring(0,200),date:new Date().toLocaleDateString()}];setSparks(ns);saveStored("tt-sparks",ns);setFlaggedIdx(idx);setTimeout(()=>setFlaggedIdx(null),2500)};
+  const flagSpark=(c,idx,modeName)=>{const ns=[...sparks,{text:c.substring(0,200),date:new Date().toLocaleDateString(),mode:modeName||mode?.label||"Session"}];setSparks(ns);saveStored("tt-sparks",ns);setFlaggedIdx(idx);setTimeout(()=>setFlaggedIdx(null),2500)};
 
   const send=async()=>{
     if(!input.trim()||loading)return;
@@ -561,8 +561,8 @@ export default function App() {
           <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,color:"#A89880",lineHeight:1.6,fontStyle:"italic"}}>"{lastThought.substring(0,150)}{lastThought.length>150?"...":""}"</div>
         </div>}
 
-        {/* Dopamine Map */}
-        {sparks.length>0&&<div style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:10,padding:"12px 16px",marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        {/* Dopamine Map - clickable */}
+        {sparks.length>0&&<div onClick={()=>setScreen("sparkmap")} className="card" style={{padding:"12px 16px",marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div style={{flex:1}}>
             <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:"0.18em",color:"#A8884A70",fontWeight:500,marginBottom:5}}>Dopamine map</div>
             <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,color:"#8A7E6A",fontStyle:"italic"}}>"{sparks[sparks.length-1]?.text}"</div>
@@ -685,6 +685,38 @@ export default function App() {
         </div>
       </div>}
 
+      {/* PROOF OF FIRE - DOPAMINE MAP */}
+      {screen==="sparkmap"&&<div style={{maxWidth:820,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
+        <div onClick={goHome} style={{fontSize:12,color:"#6A6050",cursor:"pointer",marginBottom:16}}>Back</div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:24}}>
+          <div>
+            <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:"0.25em",color:"#A8884A80",fontWeight:500,marginBottom:6}}>Dopamine Map</div>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,color:"#D8C8AA",fontWeight:500}}>Proof of Fire</div>
+            <div style={{fontSize:12,color:"#6A6050",marginTop:4,lineHeight:1.5}}>The moments your brain saw clearly.</div>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontSize:28,color:"#A8884A",fontWeight:600,animation:"wp 4s ease-in-out infinite"}}>{sparks.length}</div>
+            <div style={{fontSize:10,color:"#6A6050"}}>spark{sparks.length>1?"s":""}</div>
+          </div>
+        </div>
+        <div style={{position:"relative",paddingLeft:28}}>
+          <div style={{position:"absolute",left:8,top:0,bottom:0,width:1,background:"linear-gradient(180deg,#A8884A60,#A8884A20,#A8884A08)"}}/>
+          {[...sparks].reverse().map((s,i)=><div key={i} style={{position:"relative",marginBottom:20,animation:"fu .5s ease-out",animationDelay:`${i*0.08}s`,animationFillMode:"both"}}>
+            <div style={{position:"absolute",left:-24,top:6,width:10,height:10,borderRadius:"50%",background:"#A8884A",boxShadow:`0 0 ${Math.max(12-i*2,2)}px #A8884A${Math.max(60-i*10,10).toString(16)}`,opacity:Math.max(1-i*0.08,0.3)}}/>
+            <div style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:10,padding:"16px 18px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+                <div style={{fontSize:9,color:"#A8884A80",textTransform:"uppercase",letterSpacing:"0.15em"}}>{s.mode||"Session"}</div>
+                <div style={{fontSize:9,color:"#4A4238"}}>{s.date}</div>
+              </div>
+              <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:15,color:"#C8B8A0",lineHeight:1.7,fontStyle:"italic"}}>"{s.text}"</div>
+            </div>
+          </div>)}
+        </div>
+        <div style={{textAlign:"center",padding:"20px 0 32px"}}>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:17,fontWeight:600,color:"#A8884A90",lineHeight:1.6}}>The fire was here.<br/>These sparks prove it.</div>
+        </div>
+      </div>}
+
       {/* DAILY SPARK */}
       {screen==="torch"&&<div style={{maxWidth:820,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
         <div onClick={goHome} style={{fontSize:12,color:"#6A6050",cursor:"pointer",marginBottom:16}}>Back</div>
@@ -752,7 +784,7 @@ export default function App() {
                   <span style={{fontSize:10,color:"#4A4238",marginLeft:12}}>{getWordCount(currentScene.text)} words</span>
                 </div>
                 <div style={{display:"flex",gap:8,alignItems:"center"}}>
-                  <span onClick={()=>{if(currentScene.text){const t=currentScene.text.substring(0,200);const ns=[...sparks,{text:t,date:new Date().toLocaleDateString()}];setSparks(ns);saveStored("tt-sparks",ns)}}} style={{fontSize:10,color:"#6A6050",background:"#1A1816",border:"1px solid #221E1A",borderRadius:4,padding:"3px 8px",cursor:"pointer"}}>This excites me</span>
+                  <span onClick={()=>{if(currentScene.text){const t=currentScene.text.substring(0,200);const ns=[...sparks,{text:t,date:new Date().toLocaleDateString(),mode:"The Forge"}];setSparks(ns);saveStored("tt-sparks",ns)}}} style={{fontSize:10,color:"#6A6050",background:"#1A1816",border:"1px solid #221E1A",borderRadius:4,padding:"3px 8px",cursor:"pointer"}}>This excites me</span>
                   <input value={currentScene.title||""} onChange={e=>{const updated=scenes.map(s=>s.id===currentScene.id?{...s,title:e.target.value}:s);setScenes(updated)}} placeholder="Scene title (optional)" style={{background:"none",border:"none",outline:"none",color:"#6A6050",fontSize:10,fontFamily:"'DM Sans',sans-serif",width:140,textAlign:"right"}}/>
                 </div>
               </div>
@@ -790,7 +822,7 @@ export default function App() {
               {containerMsgs.map((m,i)=><div key={i} style={{background:m.role==="assistant"?"#1A1816":"#1E1A16",border:"1px solid "+(m.role==="assistant"?"#221E1A":"#2A2420"),borderRadius:10,padding:"10px 12px",alignSelf:m.role==="user"?"flex-end":"flex-start",maxWidth:"95%"}}>
                 {m.role==="assistant"&&<div style={{fontSize:9,color:"#A8884A80",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:5}}>Finn</div>}
                 <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,color:"#C8B8A0",lineHeight:1.7}}>{m.content.split("\n").map((l,j)=><p key={j} style={{marginBottom:l?8:3}}>{l}</p>)}</div>
-                {m.role==="assistant"&&i>0&&<span onClick={()=>{const ns=[...sparks,{text:m.content.substring(0,200),date:new Date().toLocaleDateString()}];setSparks(ns);saveStored("tt-sparks",ns)}} style={{fontSize:9,color:"#6A6050",border:"1px solid #221E1A",borderRadius:4,padding:"2px 6px",marginTop:6,display:"inline-block",cursor:"pointer"}}>This excites me</span>}
+                {m.role==="assistant"&&i>0&&<span onClick={()=>{const ns=[...sparks,{text:m.content.substring(0,200),date:new Date().toLocaleDateString(),mode:"The Forge"}];setSparks(ns);saveStored("tt-sparks",ns)}} style={{fontSize:9,color:"#6A6050",border:"1px solid #221E1A",borderRadius:4,padding:"2px 6px",marginTop:6,display:"inline-block",cursor:"pointer"}}>This excites me</span>}
               </div>)}
               {loading&&<div style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:10,padding:"10px 12px"}}><div style={{fontSize:9,color:"#A8884A80",marginBottom:5}}>Finn</div><span style={{fontSize:13,color:"#6A6050",fontStyle:"italic"}}>Thinking...</span></div>}
               <div ref={cEndRef}/>
