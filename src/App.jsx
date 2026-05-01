@@ -425,7 +425,16 @@ export default function App() {
     setLoading(false);abortRef.current=null;
   };
 
-  const handleSetup=async()=>{const p={...pForm,updated:new Date().toLocaleDateString()};setProject(p);saveStored("tt-project",p);setScreen("home")};
+  const handleSetup=async()=>{
+    const p={...pForm,updated:new Date().toLocaleDateString()};setProject(p);saveStored("tt-project",p);
+    // Scaffold chapters into The Forge if no scenes exist yet
+    const existingScenes=loadStored("tt-scenes");
+    if((!existingScenes||existingScenes.length===0)&&pForm.chapters&&pForm.chapters.some(c=>c.summary)){
+      const newScenes=pForm.chapters.filter(c=>c.summary).map((c,i)=>({id:"s_ch"+c.num,chapter:c.num,scene:1,title:c.summary.substring(0,50),text:"",status:"drafting",lastEdited:Date.now()}));
+      if(newScenes.length>0){saveScenes(newScenes);setScenes(newScenes)}
+    }
+    setScreen("home");
+  };
   const updateField=(k,v)=>setPForm(prev=>({...prev,[k]:v}));
   const addChapter=()=>setPForm(prev=>({...prev,chapters:[...prev.chapters,{num:prev.chapters.length+1,summary:""}]}));
   const removeChapter=(idx)=>setPForm(prev=>({...prev,chapters:prev.chapters.filter((_,i)=>i!==idx).map((c,i)=>({...c,num:i+1}))}));
@@ -569,11 +578,7 @@ export default function App() {
         </div>
 
         {/* Card Grid Row 3 */}
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:8,marginBottom:20}}>
-          <div className="card" onClick={()=>pick(MODES.find(m=>m.id==="forge"))} style={{textAlign:"center",padding:"12px 8px"}}>
-            <svg width="14" height="14" viewBox="0 0 14 14" style={{margin:"0 auto 6px",display:"block"}}><path d="M7 1l1.2 3.5L7 12 5.8 4.5z" fill="none" stroke="#A8884A" strokeWidth="0.8"/><rect x="5.5" y="11.5" width="3" height="1.3" rx="0.4" fill="#A8884A" opacity="0.25"/></svg>
-            <div style={{fontSize:10,fontWeight:500,color:"#A8884A"}}>Forge</div>
-          </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:20}}>
           <div className="card" onClick={()=>pick(MODES.find(m=>m.id==="inferno"))} style={{textAlign:"center",padding:"12px 8px",background:"linear-gradient(135deg,#1E1614,#1A1210)",borderColor:"#2A201A"}}>
             <svg width="14" height="14" viewBox="0 0 14 14" style={{margin:"0 auto 6px",display:"block"}}><path d="M7 1.5c1.8 1.8 3.5 3.5 2.3 6.5c-.8 2-1.8 1.5-2.3 1.5s-1.5.5-2.3-1.5c-1.2-3 .5-4.7 2.3-6.5z" fill="#B06848" opacity="0.12" stroke="#B06848" strokeWidth="0.8"/></svg>
             <div style={{fontSize:10,fontWeight:500,color:"#B06848"}}>Inferno</div>
