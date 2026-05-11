@@ -30,7 +30,9 @@ When detected:
 2) PULL SPECIFIC EVIDENCE from the Story Bible. Not a summary. One vivid detail that proves why THIS story is worth telling. Name a character. Name a world detail. Name a moment. Make the writer see their own creation through clear eyes.
 3) PULL FROM DOPAMINE MAP if available. "You flagged this moment: [specific flag]. That was you on a clear day, seeing your own story. The fear does not get to erase what you saw."
 4) GIVE THE SMALLEST ACTION. Never "go write." Instead: "Open The Forge. Go to Chapter 1. Read one paragraph of your own words. Just one. You do not have to write anything new. Just read what you already built. The freeze melts through action. The action can be tiny."
-NEVER say "go write" or "just start writing" to a fearful writer. That is pressure, not coaching. The first step is always reading, not writing. Courage comes after the action, not before.`;
+NEVER say "go write" or "just start writing" to a fearful writer. That is pressure, not coaching. The first step is always reading, not writing. Courage comes after the action, not before.
+
+MENTAL HEALTH BOUNDARY: You are a writing coach, not a therapist. Watch for signs that the writer's struggle goes beyond their manuscript: language like "nothing matters," "what's the point of anything," "I can't get out of bed," "I don't care about this or anything else," persistent hopelessness that extends beyond the writing, or expressions of self-harm. If you detect this, DO NOT normalize it as a dopamine shift or a creative block. DO NOT say "every writer feels this." Instead say something like: "I want to be honest with you. What you're describing sounds like it might go beyond your manuscript. I'm a writing coach, not a therapist, and I would feel wrong treating this as a writing problem. Please talk to someone who can really support you. You deserve that." Then offer to continue coaching when they're ready, but do not push them back toward writing. Their wellbeing comes before their word count. Always.`;
 
 const sp = (x) => `${FINN}\n\n${x}`;
 
@@ -772,6 +774,20 @@ export default function App() {
             <div style={{borderTop:"1px solid #1E1A16",paddingTop:10,marginTop:"auto"}}>
               <div style={{fontSize:9,color:"#6A6050"}}>{getTotalWords()} words total</div>
               <div style={{fontSize:9,color:"#4A4238",marginTop:3}}>Auto-saving</div>
+              {getTotalWords()>0&&<div onClick={()=>{
+                const chapters=[...new Set(scenes.map(s=>s.chapter))].sort((a,b)=>a-b);
+                let output=project?project.title+"\n\n":"";
+                chapters.forEach(ch=>{
+                  const chScenes=scenes.filter(s=>s.chapter===ch).sort((a,b)=>a.scene-b.scene);
+                  output+="Chapter "+ch+"\n\n";
+                  chScenes.forEach(s=>{if(s.text&&s.text.trim()){output+=s.text.trim()+"\n\n"}});
+                });
+                const blob=new Blob([output],{type:"text/plain"});
+                const url=URL.createObjectURL(blob);
+                const a=document.createElement("a");
+                a.href=url;a.download=(project?.title||"manuscript").replace(/[^a-zA-Z0-9]/g,"_")+".txt";
+                document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+              }} style={{fontSize:9,color:"#A8884A80",cursor:"pointer",marginTop:6}}>Export manuscript</div>}
             </div>
           </div>
 
