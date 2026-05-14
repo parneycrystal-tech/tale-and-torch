@@ -2,7 +2,18 @@ import { useState, useRef, useEffect } from "react";
 
 const FINN = `You are Finn (short for Finnigan), the writing coach behind Forged Pen. Lit major, psych minor. Old soul, sharp but never cutting, dry wit, warm underneath. You ask the one question that unlocks everything.
 
-RULES: Never write prose for the writer. ONE illustrative sentence max to demo a technique. Lead with genuine strengths (RSD-aware). Never say "just focus," "push through," "be disciplined," or "try harder." Never use em dashes. Never evaluate talent or predict publishability. Find what's working, coach from there. Every writer who opens this app is a writer. Full stop.
+RULES: Lead with genuine strengths (RSD-aware). Never say "just focus," "push through," "be disciplined," or "try harder." Never evaluate talent or predict publishability. Find what's working, coach from there. Every writer who opens this app is a writer. Full stop.
+
+PROSE RULE: You are a coach, not a ghostwriter. This is a hierarchy:
+- DEFAULT (90% of responses): Describe the technique in coaching language. What to focus on, what effect to aim for, what order to layer the elements. Give ONE sentence max as an example, clearly marked. "Something like: [one sentence]. Now write it your way."
+- WHEN THE WRITER IS SEVERELY STUCK AND HAS EXISTING TEXT: You may rework a few lines of THEIR words to demonstrate a technique. Always mark it clearly. Always follow with "does this direction feel right?" or "now write your version." You are showing them their own material working harder, not inventing new material.
+- NEVER: Write a full passage, paragraph, or scene from scratch. Never generate new prose the writer did not start. If you catch yourself writing more than two sentences of example prose, stop. Describe the technique instead.
+
+EM DASH RULE: Never use em dashes. Never use hyphens with spaces as a substitute (word - word). Use commas, periods, colons, semicolons, or restructure the sentence instead. This applies to every response without exception.
+
+TYPO AWARENESS: When you quote a specific line from the writer's work and evaluate it, check that quoted line for typos, missing words, or grammatical errors. If you find one, mention it gently alongside your feedback. Do not let a typo sit inside a line you are calling strong. You are not a proofreader scanning the whole manuscript, but you must not praise a broken sentence without noting the break.
+
+TEACHING MANDATE: Your job is not just to help the writer finish this manuscript. Your job is to make the writer better. Teach craft principles they can carry to every future project. When you give feedback, name the technique. When you demonstrate, explain what you are doing and why it works. The writer should walk away from every conversation having learned something about writing, not just having solved today's problem.
 
 CONCISENESS: Say more in fewer words. Your responses should feel like a coach talking, not an essay. Front-load the insight or action. Cut setup and preamble. If you can say it in 2 sentences, don't use 4. Short paragraphs. No walls of text. The writer's ADHD brain loses the thread in long responses. Be warm but efficient.
 
@@ -257,6 +268,10 @@ export default function App() {
   const [finnOpen, setFinnOpen] = useState(false);
   const [containerMsgs, setContainerMsgs] = useState([]);
   const [containerInput, setContainerInput] = useState("");
+  const [pulse, setPulse] = useState(null);
+  const [theme, setTheme] = useState("dark");
+  const [finnPanelSize, setFinnPanelSize] = useState("medium");
+  const finnWidths = {small:300,medium:360,large:460};
   const endRef = useRef(null);
   const taRef = useRef(null);
   const writeRef = useRef(null);
@@ -287,11 +302,15 @@ export default function App() {
     const sess = loadStored("tt-session");
     const lt = loadStored("tt-lastthought");
     const sc = loadStored("tt-scenes");
+    const pl = loadStored("tt-pulse");
+    const th = loadStored("tt-theme");
     if (p) setProject(p);
     if (s) setSparks(s);
     if (sess) setLastSession(sess);
     if (lt) setLastThought(lt);
     if (sc) setScenes(sc);
+    if (pl) setPulse(pl);
+    if (th) setTheme(th);
   },[]);
 
   useEffect(()=>{endRef.current?.scrollIntoView({behavior:"smooth"})},[msgs]);
@@ -348,7 +367,12 @@ export default function App() {
     setScenes(updated);
     saveStored("tt-activescene",id);
     const lastSentence=text.trim().split(/[.!?]+/).filter(s=>s.trim()).pop()?.trim()||null;
-    if(lastSentence)setLastThought(lastSentence);
+    if(lastSentence){
+      setLastThought(lastSentence);
+      const cs=updated.find(s=>s.id===id);
+      const newPulse={mode:"The Forge",modeId:"forge",scene:cs?`Ch${cs.chapter}, Scene ${cs.scene}`:"",sceneId:id,title:cs?.title||"",description:lastSentence.substring(0,120),time:Date.now()};
+      setPulse(newPulse);saveStored("tt-pulse",newPulse);
+    }
   };
 
   // Auto-save every 3 seconds when writing
@@ -376,7 +400,12 @@ export default function App() {
       const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({system:CONTAINER_FINN+sceneCtx+pCtx+sparkCtx,messages:nm.map(m=>({role:m.role,content:m.content}))}),signal:ctrl.signal});
       const d=await r.json();
       if(d.error){setContainerMsgs(p=>[...p,{role:"assistant",content:`Connection issue: ${d.error}`}])}
-      else{setContainerMsgs(p=>[...p,{role:"assistant",content:d.content?.filter(b=>b.type==="text").map(b=>b.text).join("\n")||"Connection hiccup."}])}
+      else{
+        setContainerMsgs(p=>[...p,{role:"assistant",content:d.content?.filter(b=>b.type==="text").map(b=>b.text).join("\n")||"Connection hiccup."}]);
+        const cs=scenes.find(s=>s.id===activeScene);
+        const newPulse={mode:"The Forge",modeId:"forge",scene:cs?`Ch${cs.chapter}, Scene ${cs.scene}`:"",sceneId:activeScene,title:cs?.title||"",description:containerInput.substring(0,120),time:Date.now()};
+        setPulse(newPulse);saveStored("tt-pulse",newPulse);
+      }
     }catch(e){if(e.name!=="AbortError")setContainerMsgs(p=>[...p,{role:"assistant",content:"Connection hiccup. Try again."}])}
     setLoading(false);abortRef.current=null;
   };
@@ -455,6 +484,8 @@ export default function App() {
         setMsgs(p=>[...p,{role:"assistant",content:`Connection issue: ${d.error}. Try again in a moment.`}]);
       } else {
         setMsgs(p=>[...p,{role:"assistant",content:d.content?.filter(b=>b.type==="text").map(b=>b.text).join("\n")||"Connection hiccup."}]);
+        const newPulse={mode:mode.label,modeId:mode.id,scene:project?.where||null,description:userText.substring(0,120),vividLine:null,time:Date.now()};
+        setPulse(newPulse);saveStored("tt-pulse",newPulse);
       }
     }catch(e){if(e.name!=="AbortError")setMsgs(p=>[...p,{role:"assistant",content:"Connection hiccup. Try again."}])}
     setLoading(false);abortRef.current=null;
@@ -476,6 +507,7 @@ export default function App() {
   const updateChapter=(idx,val)=>setPForm(prev=>({...prev,chapters:prev.chapters.map((c,i)=>i===idx?{...c,summary:val}:c)}));
 
   const isFocusMode = mode && (mode.id==="micro"||mode.id==="smoke");
+  const T = theme==="light" ? {bg:"#F5F0E8",bg2:"#EDE8DF",card:"#FFFFFF",border:"#D8D0C4",text:"#2A2520",text2:"#5A5248",text3:"#8A7E6A",gold:"#886A3D",goldBg:"#886A3D15",goldBorder:"#886A3D30"} : {bg:"#121010",bg2:"#141210",card:"#1A1816",border:"#221E1A",text:"#D8C8AA",text2:"#8A7E6A",text3:"#6A6050",gold:"#A8884A",goldBg:"#A8884A0A",goldBorder:"#A8884A20"};
 
   return (
     <div style={{fontFamily:"'DM Sans',sans-serif",background:"#121010",color:"#D8C8AA",minHeight:"100vh"}}>
@@ -493,6 +525,8 @@ export default function App() {
         .sb{transition:all .2s}.sb:hover:not(:disabled){transform:scale(1.03);filter:brightness(1.1)}
         .cp{cursor:pointer;transition:all .4s}.cp:hover{transform:scale(1.01)}
         .fi{background:#1A1816;border:1px solid #221E1A;border-radius:8px;padding:10px 14px;color:#D8C8AA;font-family:'Cormorant Garamond',serif;font-size:15px;width:100%;outline:none}.fi:focus{border-color:#A8884A40}
+        .right-sb{display:none}
+        @media(min-width:1100px){.right-sb{display:flex}}
       `}</style>
 
       {/* WELCOME */}
@@ -530,7 +564,10 @@ export default function App() {
             <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,fontWeight:600,color:"#A8884A",letterSpacing:"0.04em"}}>Forged Pen</div>
             <div style={{fontSize:9,color:"#6A6050",letterSpacing:"0.08em",marginTop:3}}>YOUR WRITING COACH, NOT YOUR GHOSTWRITER</div>
           </div>
-          {screen==="chat"&&mode&&<span onClick={goHome} style={{fontSize:12,color:"#6A6050",cursor:"pointer",padding:"4px 0"}}>Back</span>}
+          <div style={{display:"flex",gap:10,alignItems:"center"}}>
+            <span onClick={()=>{const next=theme==="dark"?"light":"dark";setTheme(next);saveStored("tt-theme",next)}} style={{fontSize:14,cursor:"pointer",opacity:.5}} title="Toggle light/dark">{theme==="dark"?"\u2600":"🌙"}</span>
+            {screen==="chat"&&mode&&<span onClick={goHome} style={{fontSize:12,color:"#6A6050",cursor:"pointer",padding:"4px 0"}}>Back</span>}
+          </div>
         </div>
       </div>}
 
@@ -538,7 +575,7 @@ export default function App() {
       {screen==="home"&&<div style={{maxWidth:820,margin:"0 auto",padding:"0 20px 20px",animation:"fu .5s ease-out"}}>
         {/* Quote */}
         <div style={{textAlign:"center",padding:"4px 20px 16px"}}>
-          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,fontWeight:500,color:"#A8884A90",lineHeight:1.7}}>"{tk.q}"</div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:17,fontWeight:600,color:"#A8884AB0",lineHeight:1.7}}>"{tk.q}"</div>
           <div style={{fontSize:10,color:"#6A6050",marginTop:5}}>{tk.a}</div>
         </div>
 
@@ -557,10 +594,14 @@ export default function App() {
           </>:<div className="sb" onClick={()=>setScreen("setup")} style={{background:"#A8884A",border:"none",borderRadius:8,padding:"11px 24px",textAlign:"center",cursor:"pointer"}}><span style={{fontSize:12,fontWeight:500,color:"#0F0E0C",letterSpacing:"0.03em"}}>{route.label}</span></div>}
         </div>})()}
 
-        {/* Last Thought */}
-        {lastThought&&<div style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:8,padding:"10px 16px",marginBottom:12,display:"flex",alignItems:"flex-start",gap:10}}>
-          <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:"0.18em",color:"#6A6050",fontWeight:500,whiteSpace:"nowrap",paddingTop:2}}>Last thought</div>
-          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,color:"#A89880",lineHeight:1.6,fontStyle:"italic"}}>"{lastThought.substring(0,150)}{lastThought.length>150?"...":""}"</div>
+        {/* The Pulse */}
+        {pulse&&<div onClick={()=>{if(pulse.sceneId){setActiveScene(pulse.sceneId);saveStored("tt-activescene",pulse.sceneId);initScenes()}else if(pulse.modeId){const m=MODES.find(x=>x.id===pulse.modeId);if(m)pick(m)}}} style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:8,padding:"12px 16px",marginBottom:12,cursor:"pointer"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+            <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:"0.18em",color:"#A8884A80",fontWeight:500}}>The Pulse</div>
+            <div style={{fontSize:9,color:"#4A4238"}}>{pulse.mode}{pulse.scene?` / ${pulse.scene}`:""}</div>
+          </div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,color:"#A89880",lineHeight:1.6}}>{pulse.description}</div>
+          {pulse.title&&<div style={{fontSize:10,color:"#6A6050",marginTop:4}}>{pulse.title}</div>}
         </div>}
 
         {/* Dopamine Map - clickable */}
@@ -634,6 +675,31 @@ export default function App() {
         <div style={{textAlign:"center",padding:"4px 0 16px"}}>
           <div style={{fontSize:10,color:"#6A6050",lineHeight:1.6}}>Forged Pen is a writing craft tool, not a mental health service or diagnostic tool.<br/>If you are in crisis, please reach out to a qualified professional.</div>
         </div>
+      </div>}
+
+      {/* DESKTOP RIGHT SIDEBAR - At a Glance */}
+      {screen==="home"&&project&&<div className="right-sb" style={{position:"fixed",right:0,top:0,bottom:0,width:220,background:"#141210",borderLeft:"1px solid #1E1A16",padding:"24px 16px",flexDirection:"column",overflowY:"auto"}}>
+        <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.22em",color:"#6A6050",fontWeight:500,marginBottom:12}}>At a Glance</div>
+        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,fontWeight:600,color:"#D8C8AA",marginBottom:4}}>{project.title}</div>
+        {project.genre&&<div style={{fontSize:10,color:"#6A6050",fontStyle:"italic",marginBottom:8}}>{project.genre}</div>}
+        {project.where&&<div style={{fontSize:11,color:"#8A7E6A",lineHeight:1.5,marginBottom:12}}>{project.where}</div>}
+        <div style={{height:1,background:"#1E1A16",marginBottom:12}}/>
+        <div style={{fontSize:9,color:"#6A6050",marginBottom:4}}>{getTotalWords()} words</div>
+        <div style={{fontSize:9,color:"#6A6050",marginBottom:12}}>{scenes.length} scene{scenes.length>1?"s":""}</div>
+        {pulse&&<><div style={{height:1,background:"#1E1A16",marginBottom:12}}/><div style={{marginBottom:12}}>
+          <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.18em",color:"#A8884A80",fontWeight:500,marginBottom:6}}>The Pulse</div>
+          <div style={{fontSize:10,color:"#8A7E6A",marginBottom:3}}>{pulse.mode}{pulse.scene?` / ${pulse.scene}`:""}</div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:12,color:"#A89880",lineHeight:1.5}}>{pulse.description}</div>
+        </div></>}
+        {sparks.length>0&&<><div style={{height:1,background:"#1E1A16",marginBottom:12}}/><div style={{marginBottom:12}}>
+          <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.18em",color:"#A8884A60",fontWeight:500,marginBottom:6}}>Latest Spark</div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:12,color:"#8A7E6A",fontStyle:"italic",lineHeight:1.5}}>"{sparks[sparks.length-1]?.text?.substring(0,100)}"</div>
+          <div style={{fontSize:9,color:"#4A4238",marginTop:4}}>{sparks.length} spark{sparks.length>1?"s":""}</div>
+        </div></>}
+        {project.stuck&&project.stuck.trim()&&<><div style={{height:1,background:"#1E1A16",marginBottom:12}}/><div>
+          <div style={{fontSize:8,textTransform:"uppercase",letterSpacing:"0.18em",color:"#6A6050",fontWeight:500,marginBottom:6}}>Working on</div>
+          <div style={{fontSize:11,color:"#8A7E6A",lineHeight:1.5}}>{project.stuck.substring(0,150)}</div>
+        </div></>}
       </div>}
 
       {/* SUBMENU */}
@@ -749,7 +815,7 @@ export default function App() {
       {screen==="container"&&(()=>{
         const currentScene=scenes.find(s=>s.id===activeScene);
         const chapters=[...new Set(scenes.map(s=>s.chapter))].sort((a,b)=>a-b);
-        return <div style={{height:"100vh",display:"grid",gridTemplateColumns:finnOpen?"180px 1fr 280px":"180px 1fr",transition:"grid-template-columns .3s"}}>
+        return <div style={{height:"100vh",display:"grid",gridTemplateColumns:finnOpen?`180px 1fr ${finnWidths[finnPanelSize]}px`:"180px 1fr",transition:"grid-template-columns .3s"}}>
           {/* Left: Scene Nav */}
           <div style={{background:"#141210",borderRight:"1px solid #1E1A16",padding:"16px 12px",display:"flex",flexDirection:"column",overflowY:"auto"}}>
             <div style={{marginBottom:16}}>
@@ -832,12 +898,15 @@ export default function App() {
                 <div style={{fontSize:9,textTransform:"uppercase",letterSpacing:"0.18em",color:"#A8884A80",fontWeight:500}}>Finn</div>
                 {currentScene&&<div style={{fontSize:10,color:"#4A4238",marginTop:2}}>Ch{currentScene.chapter}, Scene {currentScene.scene}</div>}
               </div>
-              <span onClick={()=>setFinnOpen(false)} style={{fontSize:10,color:"#4A4238",cursor:"pointer"}}>Close</span>
+              <div style={{display:"flex",gap:6,alignItems:"center"}}>
+                <div style={{display:"flex",gap:2}}>{["small","medium","large"].map(sz=><span key={sz} onClick={()=>setFinnPanelSize(sz)} style={{width:sz==="small"?10:sz==="medium"?14:18,height:10,borderRadius:2,background:finnPanelSize===sz?"#A8884A":"#2A2420",cursor:"pointer",transition:"background .2s"}}/>)}</div>
+                <span onClick={()=>setFinnOpen(false)} style={{fontSize:10,color:"#4A4238",cursor:"pointer",marginLeft:6}}>Close</span>
+              </div>
             </div>
             <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:10}}>
               {containerMsgs.map((m,i)=><div key={i} style={{background:m.role==="assistant"?"#1A1816":"#1E1A16",border:"1px solid "+(m.role==="assistant"?"#221E1A":"#2A2420"),borderRadius:10,padding:"10px 12px",alignSelf:m.role==="user"?"flex-end":"flex-start",maxWidth:"95%"}}>
                 {m.role==="assistant"&&<div style={{fontSize:9,color:"#A8884A80",textTransform:"uppercase",letterSpacing:"0.1em",marginBottom:5}}>Finn</div>}
-                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:14,color:"#C8B8A0",lineHeight:1.7}}>{m.content.split("\n").map((l,j)=><p key={j} style={{marginBottom:l?8:3}}>{l}</p>)}</div>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:15,color:"#C8B8A0",lineHeight:1.7}}>{m.content.split("\n").map((l,j)=><p key={j} style={{marginBottom:l?8:3}}>{l}</p>)}</div>
                 {m.role==="assistant"&&i>0&&<span onClick={()=>{const ns=[...sparks,{text:m.content.substring(0,200),date:new Date().toLocaleDateString(),mode:"The Forge"}];setSparks(ns);saveStored("tt-sparks",ns)}} style={{fontSize:9,color:"#6A6050",border:"1px solid #221E1A",borderRadius:4,padding:"2px 6px",marginTop:6,display:"inline-block",cursor:"pointer"}}>This excites me</span>}
               </div>)}
               {loading&&<div style={{background:"#1A1816",border:"1px solid #221E1A",borderRadius:10,padding:"10px 12px"}}><div style={{fontSize:9,color:"#A8884A80",marginBottom:5}}>Finn</div><span style={{fontSize:13,color:"#6A6050",fontStyle:"italic"}}>Thinking...</span></div>}
@@ -845,7 +914,7 @@ export default function App() {
             </div>
             <div style={{borderTop:"1px solid #1E1A16",paddingTop:10,marginTop:10}}>
               <div style={{display:"flex",gap:6,alignItems:"flex-end",background:"#1A1816",border:"1px solid #221E1A",borderRadius:10,padding:"8px 10px"}}>
-                <textarea value={containerInput} onChange={e=>setContainerInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendContainer()}}} placeholder="Ask Finn..." rows={1} style={{flex:1,background:"none",border:"none",outline:"none",color:"#D8C8AA",fontFamily:"'Cormorant Garamond',serif",fontSize:14,lineHeight:1.5,resize:"none",maxHeight:100}}/>
+                <textarea value={containerInput} onChange={e=>{setContainerInput(e.target.value);e.target.style.height="auto";e.target.style.height=Math.min(e.target.scrollHeight,120)+"px"}} onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendContainer()}}} placeholder="Ask Finn..." rows={2} style={{flex:1,background:"none",border:"none",outline:"none",color:"#D8C8AA",fontFamily:"'Cormorant Garamond',serif",fontSize:14,lineHeight:1.5,resize:"none",maxHeight:120,minHeight:40}}/>
                 <button className="sb" onClick={sendContainer} disabled={!containerInput.trim()||loading} style={{width:28,height:28,borderRadius:6,background:"#A8884A",color:"#0F0E0C",fontSize:14,fontWeight:700,border:"none",cursor:"pointer",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",opacity:!containerInput.trim()||loading?.3:1}}>{"\u2191"}</button>
               </div>
             </div>
